@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Component
+	xmlns="http://www.red5studios.com/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xsd"
+	>
+	<Info
+		title="bRemoteControl"
+		author="BurstBiscuit"
+		description=""
+		url=""
+		uiVersion="1000"
+	/>
+	<Events>
+		<Event name="ON_CHAT_MESSAGE"			bind="OnChatMessage" />
+		<Event name="ON_COMPONENT_LOAD"			bind="OnComponentLoad" />
+		<Event name="ON_SQUAD_ROSTER_UPDATE"	bind="OnSquadRosterUpdate" />
+		<Event name="ON_STREAM_PROGRESS"		bind="OnStreamProgress" />
+	</Events>
+</Component>
