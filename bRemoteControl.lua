@@ -192,7 +192,7 @@ function OnChatMessage(args)
                     Chat.SendWhisperText(args.author, "[bRemoteControl] Unable to join leader instance: Zoning was already requested by " .. ChatLib.EncodePlayerLink(g_ZoningInitiator))
                 elseif (Squad.IsLeaderOnSameInstance() or Platoon.IsLeaderOnSameInstance()) then
                     Chat.SendWhisperText(args.author, "[bRemoteControl] Already in the same instance")
-                elseif (Platoon.IsInSquad() and Platoon.IsLeaderOnSameZone()) then
+                elseif (Platoon.IsInPlatoon() and Platoon.IsLeaderOnSameZone()) then
                     Notification("Joining leader instance, requested by " .. ChatLib.EncodePlayerLink(args.author))
                     Chat.SendWhisperText(args.author, "[bRemoteControl] Joining leader instance, this will take a moment")
                     g_ZoningInitiator = args.author
@@ -286,7 +286,7 @@ end
 
 function OnStreamProgress()
     local pct, completed, total, is_streaming = Game.GetLoadingProgress()
-    Debug.Log("GetLoadingProgress()", pct, completed, total, is_streaming)
+    Debug.Log("Game.GetLoadingProgress()", pct, completed, total, is_streaming)
     
     if (g_ZoningInitiator and pct >= 1 and not is_streaming) then
         Chat.SendWhisperText(g_ZoningInitiator, "[bRemoteControl] Zoning was successful")
