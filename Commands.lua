@@ -1,0 +1,239 @@
+-- =============================================================================
+--  bRC2
+--    by: BurstBiscuit
+--        Xsear
+-- =============================================================================
+
+if (Commands) then
+    return
+end
+
+require "./Emotes"
+
+local lf = {}
+
+
+-- =============================================================================
+--  Globals
+-- =============================================================================
+
+Commands = {}
+
+
+-- =============================================================================
+--  Variables
+-- =============================================================================
+
+local g_DuelInfo    = false
+local g_GroupInfo   = false
+local g_ZoningInfo  = false
+
+
+-- =============================================================================
+--  Functions
+-- =============================================================================
+
+function Commands.OnChatMessage(args)
+    lf.OnChatMessage(args)
+end
+
+function Commands.OnDuelUpdated(args)
+    lf.OnDuelUpdated(args)
+end
+
+function Commands.OnLoadingComplete(args)
+    lf.OnLoadingComplete(args)
+end
+
+function Commands.OnPlayerReady(args)
+    lf.OnPlayerReady(args)
+end
+
+function Commands.OnSquadRosterUpdate(args)
+    lf.OnSquadRosterUpdate(args)
+end
+
+
+-- =============================================================================
+--  Local Functions
+-- =============================================================================
+
+function lf.OnChatMessage(args)
+    if (not Options.IsAddonEnabled()) then
+        return
+    elseif (not args or not args.channel or not args.author or not args.text) then
+        Debug.Warn("OnChatMessage() - Missing data:", args)
+    elseif ((namecompare(args.author, Player.GetInfo()) or Options.IsPlayerWhitelisted(ChatLib.StripArmyTag(args.author))) and unicode.match(args.text, "^!")) then
+        Debug.Event(args)
+        local text = unicode.lower(args.text)
+
+        -- Duel requests
+        if (Options.HasPermission(args.author, "Duel") and unicode.match(text, "^!duel")) then
+            Debug.Log("Duel requested:", args.author)
+
+            if (g_DuelInfo) then
+                Chat.SendWhisperText(args.author, "[bRC2] Unable to request duel: already duelling")
+
+            else
+                Notification("Duel requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                Game.RequestDuel(args.author)
+            end
+
+        -- Emote requests
+        elseif (Options.HasPermission(args.author, "Emote") and unicode.match(text, "^!emote%s+%w+")) then
+            Debug.Log("Emote requested:", args.author)
+
+            local requestedEmote = unicode.match(text, "^!emote%s+(%w+)")
+
+            if (c_Emotes[requestedEmote]) then
+                Game.SlashCommand(requestedEmote)
+            end
+
+        -- Invite requests
+        elseif (Options.HasPermission(args.author, "Invite") and unicode.match(text, "^!invite")) then
+            Debug.Log("Invite requested:", args.author)
+
+            if (g_GroupInfo and g_GroupInfo.is_mine) then
+                if (Platoon.IsInPlatoon() and #g_GroupInfo.members < Platoon.GetMaxPlatoonSize()) then
+                    Platoon.Invite(args.author)
+
+                elseif (Squad.IsInSquad() and #g_GroupInfo.members == Squad.GetMaxSquadSize()) then
+                    Platoon.Invite(args.author)
+
+                elseif (Squad.IsInSquad() and #g_GroupInfo.members < Squad.GetMaxSquadSize()) then
+                    Squad.Invite(args.author)
+
+                else
+                    Chat.SendWhisperText(args.author, "[bRC2] Unable to invite: Group is full")
+                end
+
+            elseif (g_GroupInfo and io_Settings.ForwardInvite) then
+                if (Platoon.IsInPlatoon() and #g_GroupInfo.members < Platoon.GetMaxPlatoonSize()) then
+                    Platoon.Invite(args.author)
+                    Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+
+                elseif (Squad.IsInSquad() and #g_GroupInfo.members == Squad.GetMaxSquadSize()) then
+                    Platoon.Invite(args.author)
+                    Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+
+                elseif (Squad.IsInSquad() and #g_GroupInfo.members < Squad.GetMaxSquadSize()) then
+                    Squad.Invite(args.author)
+                    Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+
+                else
+                    Chat.SendWhisperText(args.author, "[bRC2] Unable to invite: Group is full")
+                end
+
+            elseif (g_GroupInfo) then
+                Chat.SendWhisperText(args.author, "[bRC2] Unable to invite: Not leader of the group and invite forwarding is disabled. The leader of the group is: " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+
+            else
+                Squad.Invite(args.author)
+            end
+
+        -- JoinLeader requests
+        elseif (Options.HasPermission(args.author, "JoinLeader") and unicode.match(text, "^!joinleader")) then
+            Debug.Log("JoinLeader requested:", args.author)
+
+            if (g_GroupInfo and (namecompare(args.author, g_GroupInfo.leader) or namecompare(args.author, Player.GetInfo()))) then
+                if (g_ZoningInfo) then
+                    Chat.SendWhisperText(args.author, "[bRC2] Unable to join leader instance: zoning was already requested by " .. tostring(ChatLib.EncodePlayerLink(g_ZoningInfo)))
+
+                else
+                    local isJoinLeaderInvalid = Squad.IsJoinLeaderInvalid()
+
+                    if (isJoinLeaderInvalid) then
+                        Chat.SendWhisperText(args.author, "[bRC2] Unable to join leader instance: " .. tostring(isJoinLeaderInvalid))
+
+                    else
+                        g_ZoningInfo = tostring(args.author)
+
+                        Squad.JoinLeader()
+                        Chat.SendWhisperText(args.author, "[bRC2] Joining leader instance, this will take a moment")
+                        Notification("Joining leader instance, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    end
+                end
+            end
+
+        -- LeaveZone requests
+        elseif (Options.HasPermission(args.author, "LeaveZone") and unicode.match(text, "^!leavezone")) then
+            Debug.Log("LeaveZone requested:", args.author)
+
+            if (g_GroupInfo and (namecompare(args.author, g_GroupInfo.leader) or namecompare(args.author, Player.GetInfo()))) then
+                if (g_ZoningInfo) then
+                    Chat.SendWhisperText(args.author, "[bRC2] Unable to leave zone: zoning was already requested by " .. tostring(ChatLib.EncodePlayerLink(g_ZoningInfo)))
+
+                else
+                    g_ZoningInfo = tostring(args.author)
+
+                    Game.ReturnToPvE()
+                    Chat.SendWhisperText(args.author, "[bRC2] Leaving zone, this will take a moment")
+                    Notification("Leaving zone, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                end
+            end
+
+        -- Location requests
+        elseif (Options.HasPermission(args.author, "Location") and unicode.match(text, "^!loc")) then
+            Debug.Log("Location requested:", args.author)
+            Chat.SendWhisperText(args.author, "[bRC2] " .. tostring(ChatLib.EncodeCoordLink()))
+
+        -- Promote requests
+        elseif (Options.HasPermission(args.author, "Promote") and unicode.match(text, "^!promote")) then
+            Debug.Log("Promote requested:", args.author)
+
+            if (g_GroupInfo and g_GroupInfo.is_mine) then
+                for _, member in pairs(g_GroupInfo.members) do
+                    if (namecompare(args.author, member.name)) then
+                        if (Platoon.IsInPlatoon()) then
+                            Platoon.Promote(args.author)
+
+                        elseif (Squad.IsInSquad()) then
+                            Squad.Promote(args.author)
+                        end
+
+                        break
+                    end
+                end
+            end
+        end
+    end
+end
+
+function lf.OnDuelUpdated(args)
+    Debug.Event(args)
+
+    if (args.state) then
+        if (unicode.upper(args.state) == "CONFIRMED") then
+            g_DuelInfo = true
+        elseif (unicode.upper(args.state) == "COMPLETED") then
+            g_DuelInfo = false
+        end
+    end
+end
+
+function lf.OnLoadingComplete()
+    if (g_ZoningInfo) then
+        Chat.SendWhisperText(g_ZoningInfo, "[bRC2] Loading complete")
+    end
+
+    g_ZoningInfo = false
+end
+
+function lf.OnPlayerReady()
+    OnSquadRosterUpdate()
+end
+
+function lf.OnSquadRosterUpdate()
+    if (Platoon.IsInPlatoon()) then
+        g_GroupInfo = Platoon.GetRoster()
+    elseif (Squad.IsInSquad()) then
+        g_GroupInfo = Squad.GetRoster()
+    else
+        g_GroupInfo = false
+    end
+
+    Debug.Table("g_GroupInfo", g_GroupInfo)
+end

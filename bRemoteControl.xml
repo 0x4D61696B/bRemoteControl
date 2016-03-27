@@ -1,20 +1,82 @@
-<?xml version="1.0" encoding="utf-8"?>
 <Component
-	xmlns="http://www.red5studios.com/"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.red5studios.com/ ../../../../schemas/component.xsd"
-	>
-	<Info
-		title="bRemoteControl"
-		author="BurstBiscuit"
-		description=""
-		url=""
-		uiVersion="1000"
-	/>
-	<Events>
-		<Event name="ON_CHAT_MESSAGE"			bind="OnChatMessage" />
-		<Event name="ON_COMPONENT_LOAD"			bind="OnComponentLoad" />
-		<Event name="ON_SQUAD_ROSTER_UPDATE"	bind="OnSquadRosterUpdate" />
-		<Event name="ON_STREAM_PROGRESS"		bind="OnStreamProgress" />
-	</Events>
+        xmlns="http://www.red5studios.com/"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.red5studios.com/ ../../../schemas/component.xsd"
+    >
+
+    <Info
+        title="bRC2"
+        author="BurstBiscuit, Xsear"
+        description=""
+        url=""
+        uiVersion="1000"
+    />
+
+    <Events>
+        <Event name="ON_CHAT_MESSAGE"           bind="OnChatMessage"        />
+        <Event name="ON_COMPONENT_LOAD"         bind="OnComponentLoad"      />
+        <Event name="ON_COMPONENT_UNLOAD"       bind="OnComponentUnload"    />
+        <Event name="ON_DUEL_UPDATED"           bind="OnDuelUpdated"        />
+        <Event name="ON_LOADING_COMPLETE"       bind="OnLoadingComplete"    />
+        <Event name="ON_PLAYER_READY"           bind="OnPlayerReady"        />
+        <Event name="ON_SQUAD_ROSTER_UPDATE"    bind="OnSquadRosterUpdate"  />
+    </Events>
+
+    <BluePrints>
+        <BluePrint name="Panel" instantiable="true">
+            <Border dimensions="dock: fill" class="PanelBackDrop" />
+        </BluePrint>
+
+
+        <!-- Ripped from Inventory -->
+        <BluePrint name="OptionsChoicePrint" instantiable="true">
+            <Group name="ChoiceGroup" dimensions="left:5; right:100%; height:23; top:0"/>
+            <Text name="Text" dimensions="left:30; right:25; height:0; top:50%" style="font:UbuntuMedium_8; halign:left; valign:center; eatsmice:false">
+                <FocusBox name="Focus" dimensions="left:-5; right:100%+5; top:-8; bottom:15" style="eatsmice:true; cursor:sys_hand"/>
+            </Text>
+        </BluePrint>
+
+        <BluePrint name="DividerPrint" instantiable="true">
+            <StillArt dimensions="left:0; right:100%-3; top:45%; height:1" style="texture:colors; region:white; tint:#484848"/>
+        </BluePrint>
+
+        <BluePrint name="OptionsListPrint" instantiable="true">
+            <!--<ListLayout name="List" dimensions="top:30; bottom:100%; left:0; right:100%" style="vpadding:0;"/>-->
+            <Group name="List" dimensions="top:30; bottom:100%; left:0; right:100%" style="vpadding:0;clip-children:false;"/>
+        </BluePrint>
+
+        <BluePrint name="OptionsListPrint2" instantiable="true">
+            <ListLayout name="Container" dimensions="top:30; bottom:100%; left:0; right:100%" style="vpadding:0;">
+                <Group name="Header" dimensions="top:0; bottom:5%; left:0; right:100%" blueprint="OptionsLocalHeaderSection"/>
+                <StillArt dimensions="left:0; right:100%-3; top:45%; height:1" style="texture:colors; region:white; tint:#484848"/>
+                <Group name="List" dimensions="top:20%; bottom:95%; left:0; right:100%" style="vpadding:0;clip-children:false;"/>
+            </ListLayout>
+        </BluePrint>
+
+
+        <BluePrint name="OptionsLocalHeaderSection" instantiable="true">
+            <ListLayout name="Container" dimensions="dock:fill" style="horizontal:true;hpadding:20;">
+                <Dropdown dimensions="top:0;left:0;width:100;height:25;" name="SelectPlayer" />
+                <Checkbox dimensions="top:0;left:25;width:25;height:25;" name="ChoiceBlockPlayer" />
+                <Button dimensions="top:0;left:100+10;width:100;height:25;" name="ButtonRemovePlayer" />
+                <Button dimensions="top:0;left:200+20;width:100;height:25;" name="ButtonRemoveAll" />
+            </ListLayout>
+        </BluePrint>
+        <!-- // Ripped from Inventory -->
+    </BluePrints>
+
+    <Frames>
+        <WindowFrame name="Main" dimensions="center-x: 50%; center-y: 50%; width: 600; height: 600" key="{bRC2 Options}" visible="false" style="movable: true" depth="0">
+            <Children>
+                <Group id="Window" dimensions="dock:fill" style="alpha: 1">
+                    <Group id="Body" dimensions="top: 0; bottom: 100%; left: 0; right: 100%" blueprint="Panel"></Group>
+                </Group>
+                <Group id="foster_container" dimensions="dock:fill" style="visible:false" />
+            </Children>
+
+            <OnClose    bind="OnClose"  />
+            <OnEscape   bind="OnClose"  />
+            <OnOpen     bind="OnOpen"   />
+        </WindowFrame>
+    </Frames>
 </Component>
