@@ -63,12 +63,12 @@ function lf.OnChatMessage(args)
         return
     elseif (not args or not args.channel or not args.author or not args.text) then
         Debug.Warn("OnChatMessage() - Missing data:", args)
-    elseif ((namecompare(args.author, Player.GetInfo()) or Options.IsPlayerWhitelisted(ChatLib.StripArmyTag(args.author))) and unicode.match(args.text, "^!")) then
+    elseif ((namecompare(args.author, Player.GetInfo()) or Options.IsPlayerWhitelisted(args.author) and not Options.IsPlayerBlocked(args.author)) and unicode.match(args.text, "^!%w+")) then
         Debug.Event(args)
         local text = unicode.lower(args.text)
 
         -- Duel requests
-        if (Options.HasPermission(args.author, "Duel") and unicode.match(text, "^!duel")) then
+        if (unicode.match(text, "^!d") and Options.HasPermission(args.author, "Duel")) then
             Debug.Log("Duel requested:", args.author)
 
             if (g_DuelInfo) then
@@ -80,17 +80,17 @@ function lf.OnChatMessage(args)
             end
 
         -- Emote requests
-        elseif (Options.HasPermission(args.author, "Emote") and unicode.match(text, "^!emote%s+%w+")) then
+        elseif (unicode.match(text, "^!e%w*%s+%w+") and Options.HasPermission(args.author, "Emote")) then
             Debug.Log("Emote requested:", args.author)
 
-            local requestedEmote = unicode.match(text, "^!emote%s+(%w+)")
+            local requestedEmote = unicode.match(text, "^!e%w*%s+(%w+)")
 
             if (c_Emotes[requestedEmote]) then
                 Game.SlashCommand(requestedEmote)
             end
 
         -- Invite requests
-        elseif (Options.HasPermission(args.author, "Invite") and unicode.match(text, "^!invite")) then
+        elseif (unicode.match(text, "^!i") and not namecompare(args.author, Player.GetInfo()) and Options.HasPermission(args.author, "Invite")) then
             Debug.Log("Invite requested:", args.author)
 
             if (g_GroupInfo and g_GroupInfo.is_mine) then
@@ -135,7 +135,7 @@ function lf.OnChatMessage(args)
             end
 
         -- JoinLeader requests
-        elseif (Options.HasPermission(args.author, "JoinLeader") and unicode.match(text, "^!joinleader")) then
+        elseif (unicode.match(text, "^!jl") and Options.HasPermission(args.author, "JoinLeader")) then
             Debug.Log("JoinLeader requested:", args.author)
 
             if (g_GroupInfo and (namecompare(args.author, g_GroupInfo.leader) or namecompare(args.author, Player.GetInfo()))) then
@@ -158,8 +158,22 @@ function lf.OnChatMessage(args)
                 end
             end
 
+        -- LeaveGroup requests
+        elseif (unicode.match(text, "^!lg") and Options.HasPermission(args.author, "LeaveGroup")) then
+            if (g_GroupInfo) then
+                Squad.Leave()
+
+                Callback2.FireAndForget(function()
+                    if (Platoon.IsInPlatoon() or Squad.IsInSquad()) then
+                        Chat.SendWhisperText(args.author, "[bRC2] Leaving group was not successful")
+                    else
+                        Chat.SendWhisperText(args.author, "[bRC2] Left group")
+                    end
+                end, nil, 0.5)
+            end
+
         -- LeaveZone requests
-        elseif (Options.HasPermission(args.author, "LeaveZone") and unicode.match(text, "^!leavezone")) then
+        elseif (unicode.match(text, "^!lz") and Options.HasPermission(args.author, "LeaveZone")) then
             Debug.Log("LeaveZone requested:", args.author)
 
             if (g_GroupInfo and (namecompare(args.author, g_GroupInfo.leader) or namecompare(args.author, Player.GetInfo()))) then
@@ -170,18 +184,27 @@ function lf.OnChatMessage(args)
                     g_ZoningInfo = tostring(args.author)
 
                     Game.ReturnToPvE()
-                    Chat.SendWhisperText(args.author, "[bRC2] Leaving zone, this will take a moment")
                     Notification("Leaving zone, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+
+                    Callback2.FireAndForget(function()
+                        local leaveZoneCountdown = Player.GetLeaveZoneCountdown()
+
+                        if (leaveZoneCountdown and type(leaveZoneCountdown) == "number" and leaveZoneCountdown > 2) then
+                            Chat.SendWhisperText(args.author, "[bRC2] Leaving zone in " .. tostring(leaveZoneCountdown) .. " seconds")
+                        else
+                            Chat.SendWhisperText(args.author, "[bRC2] Leaving zone, this will take a moment")
+                        end
+                    end, nil, 0.5)
                 end
             end
 
         -- Location requests
-        elseif (Options.HasPermission(args.author, "Location") and unicode.match(text, "^!loc")) then
+        elseif (unicode.match(text, "^!lo") and Options.HasPermission(args.author, "Location")) then
             Debug.Log("Location requested:", args.author)
             Chat.SendWhisperText(args.author, "[bRC2] " .. tostring(ChatLib.EncodeCoordLink()))
 
         -- Promote requests
-        elseif (Options.HasPermission(args.author, "Promote") and unicode.match(text, "^!promote")) then
+        elseif (unicode.match(text, "^!p") and Options.HasPermission(args.author, "Promote")) then
             Debug.Log("Promote requested:", args.author)
 
             if (g_GroupInfo and g_GroupInfo.is_mine) then

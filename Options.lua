@@ -19,20 +19,29 @@ local lf = {}
 
 Options = {}
 
+-- =============================================================================
+--  Constants
+-- =============================================================================
+
+c_DefaultPermissions = {
+    Duel        = false,
+    Emote       = false,
+    Invite      = false,
+    JoinLeader  = false,
+    LeaveGroup  = false,
+    LeaveZone   = false,
+    Location    = false,
+    Promote     = false
+}
+
 
 -- =============================================================================
 --  Variables
 -- =============================================================================
 
-local g_GlobalPermissions = {
-    Duel        = false,
-    Emote       = false,
-    Invite      = false,
-    JoinLeader  = false,
-    LeaveZone   = false,
-    Location    = false,
-    Promote     = false
-}
+local g_BlockedPlayers = {}
+
+local g_GlobalPermissions = c_DefaultPermissions
 
 local g_PlayerPermissions = {}
 
@@ -40,15 +49,7 @@ local io_Settings   = {
     Debug           = false,
     Enabled         = false,
     ForwardInvite   = false,
-    Permissions     = {
-        Duel        = false,
-        Emote       = false,
-        Invite      = false,
-        JoinLeader  = false,
-        LeaveZone   = false,
-        Location    = false,
-        Promote     = false
-    }
+    Permissions     = c_DefaultPermissions
 }
 
 local c_OptionsMap = {
@@ -80,6 +81,10 @@ local c_OptionsMap = {
         io_Settings.Permissions.JoinLeader = value
     end,
 
+    PERMISSION_LEAVEGROUP = function(value)
+        io_Settings.Permissions.LeaveGroup = value
+    end,
+
     PERMISSION_LEAVEZONE = function(value)
         io_Settings.Permissions.LeaveZone = value
     end,
@@ -108,6 +113,7 @@ do
         InterfaceOptions.AddCheckBox({id = "PERMISSION_EMOTE",      label = "Emote",        default = io_Settings.Permissions.Emote})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_INVITE",     label = "Invite",       default = io_Settings.Permissions.Invite})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_JOINLEADER", label = "JoinLeader",   default = io_Settings.Permissions.JoinLeader})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEGROUP", label = "LeaveGroup",   default = io_Settings.Permissions.LeaveGroup})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",  label = "LeaveZone",    default = io_Settings.Permissions.LeaveZone})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",   label = "Location",     default = io_Settings.Permissions.Location})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",    label = "Promote",      default = io_Settings.Permissions.Promote})
@@ -124,6 +130,10 @@ function Options.Setup()
     InterfaceOptions.SetCallbackFunc(lf.OnOptionChanged)
 
     -- Get the saved options
+    if (Component.GetSetting("g_BlockedPlayers")) then
+        g_GlobalPermissions = Component.GetSetting("g_BlockedPlayers")
+    end
+
     if (Component.GetSetting("g_GlobalPermissions")) then
         g_GlobalPermissions = Component.GetSetting("g_GlobalPermissions")
     end
@@ -138,6 +148,7 @@ function Options.IsAddonEnabled()
 end
 
 function Options.SaveSettings()
+    Component.SaveSetting("g_BlockedPlayers", g_BlockedPlayers)
     Component.SaveSetting("g_GlobalPermissions", g_GlobalPermissions)
     Component.SaveSetting("g_PlayerPermissions", g_PlayerPermissions)
 end
@@ -189,6 +200,20 @@ function Options.SetPlayerPermission(playerName, permissionName, value)
 
     g_PlayerPermissions[playerName][permissionName] = value
     Debug.Table("g_PlayerPermissions", g_PlayerPermissions[playerName])
+    Options.SaveSettings()
+end
+
+function Options.IsPlayerBlocked(playerName)
+    return g_BlockedPlayers[ChatLib.StripArmyTag(playerName)] or false
+end
+
+function Options.SetPlayerBlocked(playerName, value)
+    if (value) then
+        g_BlockedPlayers[playerName] = true
+    else
+        g_BlockedPlayers[playerName] = nil
+    end
+
     Options.SaveSettings()
 end
 

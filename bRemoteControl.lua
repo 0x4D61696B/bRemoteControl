@@ -19,7 +19,7 @@ require "./Commands"
 require "./Options"
 require "./UI"
 
-Debug.EnableLogging(true)
+Debug.EnableLogging(false)
 
 
 -- =============================================================================

@@ -136,7 +136,7 @@ end
 function lf.CreateOptionCheckBox(name, PARENT, action, optionId, initCheck)
     -- Create widgets
     local CHOICE = {GROUP=Component.CreateWidget("OptionsChoicePrint", PARENT)}
-    CHOICE.GROUP:SetDims("left:0; right:100%; top:0; height:22")
+    CHOICE.GROUP:SetDims("left: 0; right: 100%; top: 0; height: 22")
     CHOICE.CHECKBOX = Component.CreateWidget(c_CheckBox, CHOICE.GROUP:GetChild("ChoiceGroup"))
 
     -- Configure option
@@ -172,7 +172,7 @@ end
 function lf.SetupGlobalUI(PANE)
     Debug.Log("SetupGlobalUI")
     -- Create list container in our tab body
-    local globalUI = {GROUP=Component.CreateWidget("OptionsListPrint", PANE)} -- Created directly onto this tab body
+    local globalUI = {GROUP = Component.CreateWidget("OptionsListPrint", PANE)} -- Created directly onto this tab body
     globalUI.LIST = globalUI.GROUP:GetChild("List")
 
     -- Create scroller ontop of the list
@@ -185,7 +185,7 @@ function lf.SetupGlobalUI(PANE)
     -- Sort the permissions by name
     local permissionList = {}
 
-    for key in pairs(Options.GetGlobalPermissions()) do
+    for key in pairs(c_DefaultPermissions) do
         table.insert(permissionList, key)
     end
 
@@ -206,23 +206,6 @@ function lf.SetupGlobalUI(PANE)
         globalUI.SCROLLER:AddRow(CHOICE.GROUP)
     end
 
-    --[[
-    -- Create checkboxes and add them to the scrolling list
-    for permissionKey, permissionValue in pairs(Options.GetGlobalPermissions()) do
-        -- Create CheckBox
-        Debug.Log("Creating Choice", permissionKey)
-        local CHOICE = lf.CreateOptionCheckBox(permissionKey, FOSTER_CONTAINER,
-            -- OnStateChange Handler
-            function(value)
-                Options.SetGlobalPermission(permissionKey, value)
-            end,
-        permissionKey, permissionValue) -- Default value being sent here
-
-        -- Add to RowScroller
-        globalUI.SCROLLER:AddRow(CHOICE.GROUP)
-    end
-    ]]
-
     -- Just incase
     globalUI.SCROLLER:UpdateSize()
 end
@@ -231,7 +214,7 @@ function lf.SetupLocalUI(PANE)
     Debug.Log("SetupLocalUI")
 
     -- Instantiate header and list
-    local localUI = {GROUP=Component.CreateWidget("OptionsListPrint2", PANE)} -- Created directly onto this tab body
+    local localUI = {GROUP = Component.CreateWidget("OptionsListPrint2", PANE)} -- Created directly onto this tab body
     localUI.CONTAINER = localUI.GROUP:GetChild("Container")
     localUI.HEADER = localUI.CONTAINER:GetChild("Header"):GetChild("Container")
     localUI.LIST = localUI.CONTAINER:GetChild("List")
@@ -252,13 +235,13 @@ function lf.SetupLocalUI(PANE)
         -- Player Block Checkbox
         localUI.CHOICE_BLOCK_PLAYER = localUI.HEADER:GetChild("ChoiceBlockPlayer")
             localUI.CHOICE_BLOCK_PLAYER:SetText("Block")
-            localUI.CHOICE_BLOCK_PLAYER:Show(false) -- TODO: This was kind of a random thought, to have the option to tempoarily "ignore" a player. Incase Plebsis acts up, for example. :)
+            localUI.CHOICE_BLOCK_PLAYER:Show(true) -- TODO: This was kind of a random thought, to have the option to tempoarily "ignore" a player. Incase Plebsis acts up, for example. :)
 
         -- Remove Player Button
         localUI.BUTTON_REMOVE_PLAYER = localUI.HEADER:GetChild("ButtonRemovePlayer")
             g_UI.w_ButtonRemovePlayer = localUI.BUTTON_REMOVE_PLAYER
             localUI.BUTTON_REMOVE_PLAYER:SetText("Remove Player")
-            localUI.BUTTON_REMOVE_PLAYER:SetParam("tint", "#ff0000")
+            localUI.BUTTON_REMOVE_PLAYER:SetParam("tint", "#FF0000")
             localUI.BUTTON_REMOVE_PLAYER:BindEvent("OnSubmit",
                 function()
                     -- Assert state
@@ -272,7 +255,7 @@ function lf.SetupLocalUI(PANE)
         -- Remove All Button
         localUI.BUTTON_REMOVE_ALL = localUI.HEADER:GetChild("ButtonRemoveAll")
             g_UI.w_ButtonRemoveAll = localUI.BUTTON_REMOVE_ALL
-            localUI.BUTTON_REMOVE_ALL:SetParam("tint", "#ff0000")
+            localUI.BUTTON_REMOVE_ALL:SetParam("tint", "#FF0000")
             localUI.BUTTON_REMOVE_ALL:SetText("Remove All")
             localUI.BUTTON_REMOVE_ALL:BindEvent("OnSubmit",
                 function()
@@ -294,7 +277,7 @@ function lf.SetupLocalUI(PANE)
         -- Sort the permissions by name
         local permissionList = {}
 
-        for key in pairs(Options.GetGlobalPermissions()) do
+        for key in pairs(c_DefaultPermissions) do
             table.insert(permissionList, key)
         end
 
@@ -325,35 +308,6 @@ function lf.SetupLocalUI(PANE)
             -- Add to RowScroller
             localUI.SCROLLER:AddRow(CHOICE.GROUP)
         end
-
-        --[[
-        -- Create checkboxes and add them to the scrolling list
-        for permissionKey, permissionValue in pairs(io_Settings.Permissions) do
-            -- Create CheckBox
-            local CHOICE = lf.CreateOptionCheckBox(permissionKey, FOSTER_CONTAINER,
-                -- OnStateChange Handler
-                function(value)
-                    -- Assert state
-                    assert(g_UI.SelectedPlayer) -- We must have a selected player in order to change his options
-                    assert(type(g_PlayerPermissions[g_UI.SelectedPlayer]) == "table") -- There must be a permissions table for the selected player
-                    assert(g_PlayerPermissions[g_UI.SelectedPlayer][permissionKey] ~= nil) -- That permissions table must have a key for the option we are changing
-
-                    -- Change that player's permissions
-                    g_PlayerPermissions[g_UI.SelectedPlayer][permissionKey] = value
-                    Debug.Log("Player", g_UI.SelectedPlayer, " permission ", permissionKey, " changed to ", tostring(value))
-                end,
-            permissionKey, permissionValue) -- Default value being sent here
-
-            -- Disable for now
-            CHOICE.CHECKBOX:Disable()
-
-            -- Store global reference so that we can change later
-            g_UI.w_PlayerCheckboxes[permissionKey] = CHOICE
-
-            -- Add to RowScroller
-            localUI.SCROLLER:AddRow(CHOICE.GROUP)
-        end
-        ]]
 
         -- Just incase
         localUI.SCROLLER:UpdateSize()
@@ -425,14 +379,19 @@ function lf.OnUIPlayerChanged()
 
             -- Set the Checkbox to the appropriate state if we have a value for the key
             if permissionValue ~= nil then
-                CHECKBOX:Enable()
                 CHECKBOX:SetCheck(permissionValue)
 
             -- If the permissionValue is nil, then the permissionKey does not exist
             else
-                CHECKBOX:Disable()
                 Debug.Warn("Player " .. tostring(player) .. " is missing " .. tostring(permissionKey) .. " in his permissions table, for which we have a checkbox.")
+                local defaultPermission = c_DefaultPermissions[permissionKey]
+
+                Options.SetPlayerPermission(player, permissionKey, defaultPermission)
+                CHECKBOX:SetCheck(defaultPermission)
             end
+
+            -- Enable the checkbox
+            CHECKBOX:Enable()
         end
 
     -- We have no player, disable all checkboxes
