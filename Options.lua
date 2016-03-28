@@ -217,6 +217,10 @@ function Options.SetPlayerBlocked(playerName, value)
     Options.SaveSettings()
 end
 
+function Options.IsInviteForwardEnabled()
+    return io_Settings.ForwardInvite
+end
+
 
 -- =============================================================================
 --  Local Functions

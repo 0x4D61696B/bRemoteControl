@@ -95,33 +95,46 @@ function lf.OnChatMessage(args)
 
             if (g_GroupInfo and g_GroupInfo.is_mine) then
                 if (Platoon.IsInPlatoon() and #g_GroupInfo.members < Platoon.GetMaxPlatoonSize()) then
-                    Platoon.Invite(args.author)
+                    if (Platoon.Invite(args.author)) then
+                        Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    end
 
                 elseif (Squad.IsInSquad() and #g_GroupInfo.members == Squad.GetMaxSquadSize()) then
-                    Platoon.Invite(args.author)
+                    if (Platoon.Invite(args.author)) then
+                        Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    end
 
                 elseif (Squad.IsInSquad() and #g_GroupInfo.members < Squad.GetMaxSquadSize()) then
-                    Squad.Invite(args.author)
+                    if (Squad.Invite(args.author)) then
+                        Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    end
 
                 else
                     Chat.SendWhisperText(args.author, "[bRC2] Unable to invite: Group is full")
                 end
 
-            elseif (g_GroupInfo and io_Settings.ForwardInvite) then
+            elseif (g_GroupInfo and Options.IsInviteForwardEnabled()) then
                 if (Platoon.IsInPlatoon() and #g_GroupInfo.members < Platoon.GetMaxPlatoonSize()) then
-                    Platoon.Invite(args.author)
-                    Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
-                    Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+                    if (Platoon.Invite(args.author)) then
+                        Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+                    end
 
+                -- TODO: Add option for "convert to platoon"
                 elseif (Squad.IsInSquad() and #g_GroupInfo.members == Squad.GetMaxSquadSize()) then
-                    Platoon.Invite(args.author)
-                    Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
-                    Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+                    if (Platoon.Invite(args.author)) then
+                        Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+                    end
 
                 elseif (Squad.IsInSquad() and #g_GroupInfo.members < Squad.GetMaxSquadSize()) then
-                    Squad.Invite(args.author)
-                    Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
-                    Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+                    if (Squad.Invite(args.author)) then
+                        Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
+                    end
 
                 else
                     Chat.SendWhisperText(args.author, "[bRC2] Unable to invite: Group is full")
@@ -131,7 +144,9 @@ function lf.OnChatMessage(args)
                 Chat.SendWhisperText(args.author, "[bRC2] Unable to invite: Not leader of the group and invite forwarding is disabled. The leader of the group is: " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
 
             else
-                Squad.Invite(args.author)
+                if (Squad.Invite(args.author)) then
+                    Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                end
             end
 
         -- JoinLeader requests
