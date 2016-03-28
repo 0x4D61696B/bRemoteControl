@@ -68,6 +68,8 @@ local g_UI = {
 
 function UI.Setup()
     lf.SetupUI()
+
+    HudManager.BindOnShow(lf.OnHudShow)
 end
 
 function UI.Open()
@@ -401,4 +403,8 @@ function lf.OnUIPlayerChanged()
             CHOICE.CHECKBOX:Disable()
         end
     end
+end
+
+function lf.OnHudShow(show, duration)
+    FRAME:ParamTo("alpha", tonumber(show), duration)
 end
