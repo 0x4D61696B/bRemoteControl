@@ -350,7 +350,7 @@ function lf.RepopulatePlayerDropdown()
         table.insert(playerList, player)
     end
 
-    table.sort(playerList, function(a, b) return a < b end)
+    table.sort(playerList, function(a, b) return unicode.lower(a) < unicode.lower(b) end)
 
     -- Add item for each player
     for _, playerName in pairs(playerList) do

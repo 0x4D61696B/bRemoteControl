@@ -61,14 +61,16 @@ end
 function lf.OnChatMessage(args)
     if (not Options.IsAddonEnabled()) then
         return
+
     elseif (not args or not args.channel or not args.author or not args.text) then
         Debug.Warn("OnChatMessage() - Missing data:", args)
+
     elseif ((namecompare(args.author, Player.GetInfo()) or Options.IsPlayerWhitelisted(args.author) and not Options.IsPlayerBlocked(args.author)) and unicode.match(args.text, "^!%w+")) then
         Debug.Event(args)
         local text = unicode.lower(args.text)
 
         -- Duel requests
-        if (unicode.match(text, "^!d") and Options.HasPermission(args.author, "Duel")) then
+        if (unicode.match(text, "^!d") and not namecompare(args.author, Player.GetInfo()) and Options.HasPermission(args.author, "Duel")) then
             Debug.Log("Duel requested:", args.author)
 
             if (g_DuelInfo) then
@@ -204,7 +206,7 @@ function lf.OnChatMessage(args)
                     Callback2.FireAndForget(function()
                         local leaveZoneCountdown = Player.GetLeaveZoneCountdown()
 
-                        if (leaveZoneCountdown and type(leaveZoneCountdown) == "number" and leaveZoneCountdown > 2) then
+                        if (type(leaveZoneCountdown) == "number" and leaveZoneCountdown > 3) then
                             Chat.SendWhisperText(args.author, "[bRC2] Leaving zone in " .. tostring(leaveZoneCountdown) .. " seconds")
                         else
                             Chat.SendWhisperText(args.author, "[bRC2] Leaving zone, this will take a moment")
@@ -219,7 +221,7 @@ function lf.OnChatMessage(args)
             Chat.SendWhisperText(args.author, "[bRC2] " .. tostring(ChatLib.EncodeCoordLink()))
 
         -- Promote requests
-        elseif (unicode.match(text, "^!p") and Options.HasPermission(args.author, "Promote")) then
+        elseif (unicode.match(text, "^!p") and not namecompare(args.author, Player.GetInfo()) and Options.HasPermission(args.author, "Promote")) then
             Debug.Log("Promote requested:", args.author)
 
             if (g_GroupInfo and g_GroupInfo.is_mine) then
