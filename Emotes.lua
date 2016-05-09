@@ -9,6 +9,7 @@ c_Emotes = {
     bask            = true,
     beg             = true,
     belch           = true,
+    blowkiss        = true,
     bow             = true,
     calm            = true,
     charge          = true,
