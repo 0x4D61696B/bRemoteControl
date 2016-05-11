@@ -43,6 +43,7 @@ c_Emotes = {
     sleep           = true,
     sneeze          = true,
     surprise        = true,
+    swimdance       = true,
     talk            = true,
     taunt           = true,
     thank           = true,
