@@ -177,7 +177,7 @@ end
 
 function Options.HasPermission(playerName, permissionName)
     Debug.Table("Options.HasPermission()", {playerName = playerName, permissionName = permissionName})
-    return namecompare(playerName, Player.GetInfo()) or (g_GlobalPermissions[permissionName] and Options.IsPlayerWhitelisted(playerName) and g_PlayerPermissions[ChatLib.StripArmyTag(playerName)][permissionName])
+    return g_GlobalPermissions[permissionName] and (namecompare(playerName, Player.GetInfo()) or (Options.IsPlayerWhitelisted(playerName) and g_PlayerPermissions[ChatLib.StripArmyTag(playerName)][permissionName]))
 end
 
 function Options.IsPlayerWhitelisted(playerName)
@@ -196,6 +196,7 @@ function Options.SetGlobalPermission(permissionName, value)
     Debug.Table("Options.SetGlobalPermission()", {permissionName = permissionName, value = value})
     g_GlobalPermissions[permissionName] = value
     Debug.Table("g_GlobalPermissions", g_GlobalPermissions)
+    Options.SaveSettings()
 end
 
 function Options.GetPlayerPermissions()
