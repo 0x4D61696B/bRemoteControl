@@ -191,7 +191,7 @@ function lf.OnChatMessage(args)
                     else
                         Chat.SendWhisperText(args.author, "[bRC2] Left group")
                     end
-                end, nil, 0.5)
+                end, nil, 1)
             end
 
         -- LeaveZone requests
@@ -217,7 +217,7 @@ function lf.OnChatMessage(args)
                         else
                             Chat.SendWhisperText(args.author, "[bRC2] Leaving zone, this will take a moment")
                         end
-                    end, nil, 0.5)
+                    end, nil, 1)
                 end
             end
 
@@ -280,7 +280,7 @@ function lf.OnChatMessage(args)
                     else
                         Chat.SendWhisperText(args.author, "[bRC2] Canceled arc: " .. tostring(jobStatus.job.arc_id) .. ": " .. tostring(jobStatus.job.name))
                     end
-                end, nil, 0.5)
+                end, nil, 1)
 
             else
                 Chat.SendWhisperText(args.author, "[bRC2] Unable to cancel arc: No job active")
