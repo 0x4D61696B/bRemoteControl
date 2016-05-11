@@ -33,7 +33,8 @@ c_DefaultPermissions = {
     Location            = false,
     Promote             = false,
     ReloadUI            = false,
-    RequestCancelArc    = false
+    RequestCancelArc    = false,
+    RequestRestartArc   = false
 }
 
 
@@ -105,6 +106,10 @@ local c_OptionsMap = {
 
     PERMISSION_REQUESTCANCELARC = function(value)
         io_Settings.Permissions.RequestCancelArc = value
+    end,
+
+    PERMISSION_REQUESTRESTARTARC = function(value)
+        io_Settings.Permissions.RequestRestartArc = value
     end
 }
 
@@ -129,6 +134,7 @@ do
         InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",            label = "Promote",              default = io_Settings.Permissions.Promote,              subtab = {"Permissions"}})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",           label = "ReloadUI",             default = io_Settings.Permissions.ReloadUI,             subtab = {"Permissions"}})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",   label = "RequestCancelArc",     default = io_Settings.Permissions.RequestCancelArc,     subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTRESTARTARC",  label = "RequestRestartArc",    default = io_Settings.Permissions.RequestRestartArc,    subtab = {"Permissions"}})
     InterfaceOptions.StopGroup({subtab = {"Permissions"}})
 end
 

@@ -285,6 +285,51 @@ function lf.OnChatMessage(args)
             else
                 Chat.SendWhisperText(args.author, "[bRC2] Unable to cancel arc: No job active")
             end
+
+        -- RequestRestartArc requests
+        elseif (unicode.match(text, "^!rra") and Options.HasPermission(args.author, "RequestRestartArc")) then
+            Debug.Log("RequestRestartArc requested:", args.author)
+
+            local jobStatus = Player.GetJobStatus()
+            Debug.Table("jobStatus", jobStatus)
+
+            if (jobStatus and jobStatus.job) then
+                Game.RequestCancelArc(jobStatus.job.arc_id)
+                Notification("Restarting arc, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+
+                Callback2.FireAndForget(function()
+                    local canceledStatus = Player.GetJobStatus()
+
+                    if (canceledStatus and canceledStatus.job) then
+                        Chat.SendWhisperText(args.author, "[bRC2] Canceling arc was not successful")
+
+                    else
+                        Chat.SendWhisperText(args.author, "[bRC2] Canceled arc #" .. tostring(jobStatus.job.arc_id) .. ": " .. tostring(jobStatus.job.name))
+
+                        local text = "Starting arc #" .. tostring(jobStatus.job.arc_id) .. " in 3 seconds: " .. tostring(jobStatus.job.name)
+
+                        if (g_GroupInfo) then
+                            if (g_GroupInfo.is_mine) then
+                                if (Platoon.IsInPlatoon()) then
+                                    Chat.SendChannelText("platoon", "[bRC2] " .. text)
+
+                                elseif (Squad.IsInSquad()) then
+                                    Chat.SendChannelText("squad", "[bRC2] " .. text)
+                                end
+
+                                Callback2.FireAndForget(Game.RequestStartArc, jobStatus.job.arc_id, 3)
+                            end
+
+                        else
+                            Notification(text)
+                            Callback2.FireAndForget(Game.RequestStartArc, jobStatus.job.arc_id, 3)
+                        end
+                    end
+                end, nil, 1)
+
+            else
+                Chat.SendWhisperText(args.author, "[bRC2] Unable to cancel arc: No job active")
+            end
         end
     end
 end
