@@ -127,8 +127,8 @@ do
         InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",          label = "LeaveZone",        default = io_Settings.Permissions.LeaveZone})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",           label = "Location",         default = io_Settings.Permissions.Location})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",            label = "Promote",          default = io_Settings.Permissions.Promote})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",           label = "ReloadUI",         default = io_Settings.Permissions.Promote})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",   label = "RequestCancelArc", default = io_Settings.Permissions.Promote})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",           label = "ReloadUI",         default = io_Settings.Permissions.ReloadUI})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",   label = "RequestCancelArc", default = io_Settings.Permissions.RequestCancelArc})
     InterfaceOptions.StopGroup()
 end
 
