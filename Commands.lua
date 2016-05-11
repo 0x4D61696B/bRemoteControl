@@ -26,6 +26,7 @@ Commands = {}
 
 local g_DuelInfo    = false
 local g_GroupInfo   = false
+local g_ReloadUI    = false
 local g_ZoningInfo  = false
 
 
@@ -47,6 +48,10 @@ end
 
 function Commands.OnPlayerReady(args)
     lf.OnPlayerReady(args)
+end
+
+function Commands.OnPreReloadUI(args)
+    lf.OnPreReloadUI(args)
 end
 
 function Commands.OnSquadRosterUpdate(args)
@@ -208,6 +213,7 @@ function lf.OnChatMessage(args)
 
                         if (type(leaveZoneCountdown) == "number" and leaveZoneCountdown > 3) then
                             Chat.SendWhisperText(args.author, "[bRC2] Leaving zone in " .. tostring(leaveZoneCountdown) .. " seconds")
+
                         else
                             Chat.SendWhisperText(args.author, "[bRC2] Leaving zone, this will take a moment")
                         end
@@ -238,6 +244,47 @@ function lf.OnChatMessage(args)
                     end
                 end
             end
+
+        -- ReloadUI requests
+        elseif (unicode.match(text, "^!rui") and Options.HasPermission(args.author, "ReloadUI")) then
+            Debug.Log("ReloadUI requested:", args.author)
+
+            if (g_ReloadUI) then
+                Chat.SendWhisperText(args.author, "[bRC2] Unable to reload UI: already requested by " .. tostring(ChatLib.EncodePlayerLink(g_ReloadUI)))
+
+            else
+                g_ReloadUI = tostring(args.author)
+
+                Notification("Reloading UI, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                Chat.SendWhisperText(args.author, "[bRC2] Reloading UI, this will take a moment")
+                Callback2.FireAndForget(System.ReloadUI, nil, 3)
+            end
+
+        -- RequestCancelArc requests
+        elseif (unicode.match(text, "^!rca") and Options.HasPermission(args.author, "RequestCancelArc")) then
+            Debug.Log("RequestCancelArc requested:", args.author)
+
+            local jobStatus = Player.GetJobStatus()
+            Debug.Table("jobStatus", jobStatus)
+
+            if (jobStatus and jobStatus.job) then
+                Game.RequestCancelArc(jobStatus.job.arc_id)
+                Notification("Canceling arc, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+
+                Callback2.FireAndForget(function()
+                    local canceledStatus = Player.GetJobStatus()
+
+                    if (canceledStatus and canceledStatus.job) then
+                        Chat.SendWhisperText(args.author, "[bRC2] Canceling arc was not successful")
+
+                    else
+                        Chat.SendWhisperText(args.author, "[bRC2] Canceled arc: " .. tostring(jobStatus.job.arc_id) .. ": " .. tostring(jobStatus.job.name))
+                    end
+                end, nil, 0.5)
+
+            else
+                Chat.SendWhisperText(args.author, "[bRC2] Unable to cancel arc: No job active")
+            end
         end
     end
 end
@@ -264,6 +311,25 @@ end
 
 function lf.OnPlayerReady()
     OnSquadRosterUpdate()
+
+    if (Component.GetSetting("g_ReloadUI")) then
+        g_ReloadUI = Component.GetSetting("g_ReloadUI")
+
+        if (g_ReloadUI and not namecompare(g_ReloadUI, Player.GetInfo())) then
+            Notification("Reloaded UI, requested by " .. tostring(ChatLib.EncodePlayerLink(g_ReloadUI)))
+            Chat.SendWhisperText(g_ReloadUI, "[bRC2] Reloading UI complete")
+        end
+
+        g_ReloadUI = false
+
+        Component.SaveSetting("g_ReloadUI", nil)
+    end
+end
+
+function lf.OnPreReloadUI(args)
+    Debug.Event(args)
+
+    Component.SaveSetting("g_ReloadUI", g_ReloadUI or Player.GetInfo())
 end
 
 function lf.OnSquadRosterUpdate()

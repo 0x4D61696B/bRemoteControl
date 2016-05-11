@@ -110,6 +110,10 @@ function OnPlayerReady(args)
     Commands.OnPlayerReady(args)
 end
 
+function OnPreReloadUI(args)
+    Commands.OnPreReloadUI(args)
+end
+
 function OnSquadRosterUpdate(args)
     Commands.OnSquadRosterUpdate(args)
 end

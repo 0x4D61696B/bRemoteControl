@@ -24,14 +24,16 @@ Options = {}
 -- =============================================================================
 
 c_DefaultPermissions = {
-    Duel        = false,
-    Emote       = false,
-    Invite      = false,
-    JoinLeader  = false,
-    LeaveGroup  = false,
-    LeaveZone   = false,
-    Location    = false,
-    Promote     = false
+    Duel                = false,
+    Emote               = false,
+    Invite              = false,
+    JoinLeader          = false,
+    LeaveGroup          = false,
+    LeaveZone           = false,
+    Location            = false,
+    Promote             = false,
+    ReloadUI            = false,
+    RequestCancelArc    = false
 }
 
 
@@ -95,6 +97,14 @@ local c_OptionsMap = {
 
     PERMISSION_PROMOTE = function(value)
         io_Settings.Permissions.Promote = value
+    end,
+
+    PERMISSION_RELOADUI = function(value)
+        io_Settings.Permissions.ReloadUI = value
+    end,
+
+    PERMISSION_REQUESTCANCELARC = function(value)
+        io_Settings.Permissions.RequestCancelArc = value
     end
 }
 
@@ -109,14 +119,16 @@ do
     InterfaceOptions.StopGroup()
 
     InterfaceOptions.StartGroup({label = "Default permissions for new entries"})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_DUEL",       label = "Duel",         default = io_Settings.Permissions.Duel})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_EMOTE",      label = "Emote",        default = io_Settings.Permissions.Emote})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_INVITE",     label = "Invite",       default = io_Settings.Permissions.Invite})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_JOINLEADER", label = "JoinLeader",   default = io_Settings.Permissions.JoinLeader})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEGROUP", label = "LeaveGroup",   default = io_Settings.Permissions.LeaveGroup})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",  label = "LeaveZone",    default = io_Settings.Permissions.LeaveZone})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",   label = "Location",     default = io_Settings.Permissions.Location})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",    label = "Promote",      default = io_Settings.Permissions.Promote})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_DUEL",               label = "Duel",             default = io_Settings.Permissions.Duel})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_EMOTE",              label = "Emote",            default = io_Settings.Permissions.Emote})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_INVITE",             label = "Invite",           default = io_Settings.Permissions.Invite})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_JOINLEADER",         label = "JoinLeader",       default = io_Settings.Permissions.JoinLeader})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEGROUP",         label = "LeaveGroup",       default = io_Settings.Permissions.LeaveGroup})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",          label = "LeaveZone",        default = io_Settings.Permissions.LeaveZone})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",           label = "Location",         default = io_Settings.Permissions.Location})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",            label = "Promote",          default = io_Settings.Permissions.Promote})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",           label = "ReloadUI",         default = io_Settings.Permissions.Promote})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",   label = "RequestCancelArc", default = io_Settings.Permissions.Promote})
     InterfaceOptions.StopGroup()
 end
 
