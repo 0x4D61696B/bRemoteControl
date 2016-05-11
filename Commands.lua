@@ -278,7 +278,7 @@ function lf.OnChatMessage(args)
                         Chat.SendWhisperText(args.author, "[bRC2] Canceling arc was not successful")
 
                     else
-                        Chat.SendWhisperText(args.author, "[bRC2] Canceled arc: " .. tostring(jobStatus.job.arc_id) .. ": " .. tostring(jobStatus.job.name))
+                        Chat.SendWhisperText(args.author, "[bRC2] Canceled arc #" .. tostring(jobStatus.job.arc_id) .. ": " .. tostring(jobStatus.job.name))
                     end
                 end, nil, 1)
 
