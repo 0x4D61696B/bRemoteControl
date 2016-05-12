@@ -113,7 +113,7 @@ function lf.SetupUI()
     g_UI.Tabs = Tabs.Create(2, BODY)
     g_UI.Tabs:AddHandler("OnTabChanged", lf.OnUITabChanged)
     g_UI.Tabs:SetTab(c_UI.TabId.Local,  {id = c_UI.TabId.Local,     label = "Player permissions"}) -- Can have texture and region keys if you want an icon on the tab, like Inventory/Account Items, and also a tint key, like Arcporter
-    g_UI.Tabs:SetTab(c_UI.TabId.Global, {id = c_UI.TabId.Global,    label = "Toggle functions"})
+    g_UI.Tabs:SetTab(c_UI.TabId.Global, {id = c_UI.TabId.Global,    label = "Toggle commands"})
 
     -- Store the bodies (:D)
     g_UI.w_TabPanes[c_UI.TabId.Local]   = g_UI.Tabs:GetBody(c_UI.TabId.Local)
