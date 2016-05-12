@@ -25,8 +25,12 @@ Commands = {}
 --  Variables
 -- =============================================================================
 
+local c_DataBreak   = ":"
+
 local g_DuelInfo    = false
 local g_GroupInfo   = false
+local g_InviteQueue = {}
+local g_HudNotes    = {}
 local g_ReloadUI    = false
 local g_ZoningInfo  = false
 
@@ -34,6 +38,10 @@ local g_ZoningInfo  = false
 -- =============================================================================
 --  Functions
 -- =============================================================================
+
+function Commands.OnChatLink(args)
+    lf.OnChatLink(args)
+end
 
 function Commands.OnChatMessage(args)
     lf.OnChatMessage(args)
@@ -59,10 +67,73 @@ function Commands.OnSquadRosterUpdate(args)
     lf.OnSquadRosterUpdate(args)
 end
 
+function Commands.MyHudNote(args)
+    lf.MyHudNote(args)
+end
+
 
 -- =============================================================================
 --  Local Functions
 -- =============================================================================
+
+function lf.OnChatLink(args)
+    if (not Options.IsAddonEnabled()) then
+        return
+
+    elseif (not args or not args.link_data or not args.author) then
+        Debug.Warn("OnChatLink() - Missing data:", args)
+
+    elseif (namecompare(args.author, Player.GetInfo()) or Options.IsPlayerWhitelisted(args.author) and not Options.IsPlayerBlocked(args.author)) then
+        Debug.Table("OnChatLink()", args)
+
+        if (unicode.match(args.link_data, "^Invite%" .. c_DataBreak .. "%w+$") and Options.HasPermission(args.author, "Invite")) then
+            if (g_GroupInfo and g_GroupInfo.is_mine) then
+                local invitee = unicode.match(args.link_data, "^Invite%" .. c_DataBreak .. "(%w+)$")
+
+                if (Options.IsPlayerWhitelisted(invitee) and not Options.IsPlayerBlocked(invitee) and Options.HasPermission(invitee, "Invite")) then
+                    if (g_InviteQueue[invitee]) then
+                        return
+
+                    else
+                        g_InviteQueue[invitee] = Callback2.Create()
+                        g_InviteQueue[invitee]:Bind(function()
+                            g_InviteQueue[invitee]:Release()
+                            g_InviteQueue[invitee] = nil
+                        end)
+                        g_InviteQueue[invitee]:Schedule(10)
+                    end
+
+                    Debug.Log("Invite requested:", invitee)
+
+                    if (Platoon.IsInPlatoon() and #g_GroupInfo.members < Platoon.GetMaxPlatoonSize()) then
+                        if (Platoon.Invite(args.author)) then
+                            Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        end
+
+                    elseif (Squad.IsInSquad() and #g_GroupInfo.members == Squad.GetMaxSquadSize()) then
+                        if (Platoon.Invite(args.author)) then
+                            Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        end
+
+                    elseif (Squad.IsInSquad() and #g_GroupInfo.members < Squad.GetMaxSquadSize()) then
+                        if (Squad.Invite(args.author)) then
+                            Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        end
+                    end
+
+                    if (g_HudNotes[invitee]) then
+                        Callback2.FireAndForget(function()
+                            Component.GenerateEvent("MY_HUD_NOTE", {
+                                command = "remove",
+                                id      = g_HudNotes[invitee]
+                            })
+                        end, nil, 1)
+                    end
+                end
+            end
+        end
+    end
+end
 
 function lf.OnChatMessage(args)
     if (not Options.IsAddonEnabled()) then
@@ -126,6 +197,7 @@ function lf.OnChatMessage(args)
                     if (Platoon.Invite(args.author)) then
                         Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
                         Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(g_GroupInfo.leader, ChatLib.GetEndcapString() .. "bRC2" .. ChatLib.GetLinkTypeIdBreak() .. "Invite" .. c_DataBreak .. ChatLib.StripArmyTag(args.author) .. ChatLib.GetEndcapString())
                         Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
                     end
 
@@ -413,4 +485,26 @@ function lf.OnSquadRosterUpdate()
     end
 
     Debug.Table("g_GroupInfo", g_GroupInfo)
+end
+
+function lf.MyHudNote(args)
+    if (args.command and args.id and args.command == "remove") then
+        if (g_HudNotes[args.id]) then
+            g_HudNotes[g_HudNotes[args.id]] = nil
+            g_HudNotes[args.id] = nil
+        end
+
+    elseif (args.json) then
+        local json = jsontotable(args.json)
+        Debug.Table("HudNote", json)
+
+        if (json.replyTo == "groupmanager:_liaison") then
+            if (json.title == "Squad Invitation Fowarded") then
+                g_HudNotes[json.id] = ChatLib.StripArmyTag(json.subtitle)
+                g_HudNotes[ChatLib.StripArmyTag(json.subtitle)] = json.id
+            end
+        end
+    end
+
+    Debug.Table("g_HudNotes", g_HudNotes)
 end

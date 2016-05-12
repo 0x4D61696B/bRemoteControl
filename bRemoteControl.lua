@@ -82,6 +82,9 @@ function OnComponentLoad()
 
     PlayerMenu.BindOnShow(OnPlayerMenuShow)
 
+    -- Register the custom chat link
+    ChatLib.RegisterCustomLinkType("bRC2", Commands.OnChatLink)
+
     -- Setup the Options
     Options.Setup()
 
@@ -116,4 +119,8 @@ end
 
 function OnSquadRosterUpdate(args)
     Commands.OnSquadRosterUpdate(args)
+end
+
+function MyHudNote(args)
+    Commands.MyHudNote(args)
 end

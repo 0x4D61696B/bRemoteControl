@@ -21,6 +21,7 @@
         <Event name="ON_PLAYER_READY"           bind="OnPlayerReady"        />
         <Event name="ON_PRE_RELOADUI"           bind="OnPreReloadUI"        />
         <Event name="ON_SQUAD_ROSTER_UPDATE"    bind="OnSquadRosterUpdate"  />
+        <Event name="MY_HUD_NOTE"               bind="MyHudNote"            />
     </Events>
 
     <BluePrints>
