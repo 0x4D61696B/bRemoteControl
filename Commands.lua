@@ -87,14 +87,19 @@ function lf.OnChatLink(args)
         Debug.Table("OnChatLink()", args)
 
         if (unicode.match(args.link_data, "^Invite%" .. c_DataBreak .. "%w+$") and Options.HasPermission(args.author, "Invite")) then
+            Debug.Log("Got an invite request via chat link")
+
             if (g_GroupInfo and g_GroupInfo.is_mine) then
+                Debug.Log("In a group and group leader, checking for permissions")
                 local invitee = unicode.match(args.link_data, "^Invite%" .. c_DataBreak .. "(%w+)$")
 
                 if (Options.IsPlayerWhitelisted(invitee) and not Options.IsPlayerBlocked(invitee) and Options.HasPermission(invitee, "Invite")) then
                     if (g_InviteQueue[invitee]) then
+                        Debug.Log("Already processing an invite forward for this invitee, return")
                         return
 
                     else
+                        Debug.Log("Creating callback for invite forward to prevent multiple invites")
                         g_InviteQueue[invitee] = Callback2.Create()
                         g_InviteQueue[invitee]:Bind(function()
                             g_InviteQueue[invitee]:Release()
@@ -106,32 +111,49 @@ function lf.OnChatLink(args)
                     Debug.Log("Invite requested:", invitee)
 
                     if (Platoon.IsInPlatoon() and #g_GroupInfo.members < Platoon.GetMaxPlatoonSize()) then
-                        if (Platoon.Invite(args.author)) then
-                            Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        if (Platoon.Invite(invitee)) then
+                            Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(invitee)))
                         end
 
                     elseif (Squad.IsInSquad() and #g_GroupInfo.members == Squad.GetMaxSquadSize()) then
-                        if (Platoon.Invite(args.author)) then
-                            Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        if (Platoon.Invite(invitee)) then
+                            Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(invitee)))
                         end
 
                     elseif (Squad.IsInSquad() and #g_GroupInfo.members < Squad.GetMaxSquadSize()) then
-                        if (Squad.Invite(args.author)) then
-                            Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        if (Squad.Invite(invitee)) then
+                            Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(invitee)))
                         end
                     end
 
                     if (g_HudNotes[invitee]) then
+                        Debug.Log("Found a HUD note for the invite forward, removing")
+
                         Callback2.FireAndForget(function()
                             Component.GenerateEvent("MY_HUD_NOTE", {
                                 command = "remove",
                                 id      = g_HudNotes[invitee]
                             })
                         end, nil, 1)
+
+                    else
+                        Debug.Log("No HUD note for invite forward found")
                     end
+
+                else
+                    Debug.Log("Invitee is not whitelisted, is blocked, or does not have the invite permission")
                 end
+
+            else
+                Debug.Log("Not in a group or not the group leader")
             end
+
+        else
+            Debug.Log("Chat link command not recognized")
         end
+
+    else
+        Debug.Log("args.author is not whitelisted, is blocked, or does not have the invite permission")
     end
 end
 
