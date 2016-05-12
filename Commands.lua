@@ -228,6 +228,7 @@ function lf.OnChatMessage(args)
                     if (Platoon.Invite(args.author)) then
                         Notification("Platoon invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
                         Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(g_GroupInfo.leader, ChatLib.GetEndcapString() .. "bRC2" .. ChatLib.GetLinkTypeIdBreak() .. "Invite" .. c_DataBreak .. ChatLib.StripArmyTag(args.author) .. ChatLib.GetEndcapString())
                         Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
                     end
 
@@ -235,6 +236,7 @@ function lf.OnChatMessage(args)
                     if (Squad.Invite(args.author)) then
                         Notification("Squad invite sent to " .. tostring(ChatLib.EncodePlayerLink(args.author)))
                         Chat.SendWhisperText(g_GroupInfo.leader, "[bRC2] Automatically forwarded invite request by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                        Chat.SendWhisperText(g_GroupInfo.leader, ChatLib.GetEndcapString() .. "bRC2" .. ChatLib.GetLinkTypeIdBreak() .. "Invite" .. c_DataBreak .. ChatLib.StripArmyTag(args.author) .. ChatLib.GetEndcapString())
                         Chat.SendWhisperText(args.author, "[bRC2] Invite request has been forwarded to " .. tostring(ChatLib.EncodePlayerLink(g_GroupInfo.leader)))
                     end
 
