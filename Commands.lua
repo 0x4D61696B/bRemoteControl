@@ -9,6 +9,7 @@ if (Commands) then
 end
 
 require "./Emotes"
+require "./Zones"
 
 local lf = {}
 
@@ -329,6 +330,31 @@ function lf.OnChatMessage(args)
 
             else
                 Chat.SendWhisperText(args.author, "[bRC2] Unable to cancel arc: No job active")
+            end
+
+        -- RequestTransfer requests
+        elseif (unicode.match(text, "^!rt %w+") and Options.HasPermission(args.author, "RequestTransfer")) then
+            Debug.Log("RequestTransfer requested:", args.author)
+
+            if (g_ZoningInfo) then
+                Chat.SendWhisperText(args.author, "[bRC2] Unable to transfer: zoning was already requested by " .. tostring(ChatLib.EncodePlayerLink(g_ZoningInfo)))
+
+            else
+                local requestedTransferZone = unicode.lower(unicode.match(text, "^!rt (%w+)"))
+
+                if (unicode.match(text, "^!rt %d+")) then
+                    requestedTransferZone = tonumber(unicode.match(text, "^!rt (%d+)"))
+                end
+
+                Debug.Log("requestedTransferZone", requestedTransferZone)
+
+                if (c_Zones[requestedTransferZone]) then
+                    g_ZoningInfo = tostring(args.author)
+
+                    Notification("Transferring, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
+                    Chat.SendWhisperText(args.author, "[bRC2] Transferring, this will take a moment")
+                    Game.RequestTransfer((type(requestedTransferZone) == "number" and requestedTransferZone or c_Zones[requestedTransferZone]))
+                end
             end
         end
     end

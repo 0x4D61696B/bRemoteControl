@@ -34,7 +34,8 @@ c_DefaultPermissions = {
     Promote             = false,
     ReloadUI            = false,
     RequestCancelArc    = false,
-    RequestRestartArc   = false
+    RequestRestartArc   = false,
+    RequestTransfer     = false
 }
 
 
@@ -110,6 +111,10 @@ local c_OptionsMap = {
 
     PERMISSION_REQUESTRESTARTARC = function(value)
         io_Settings.Permissions.RequestRestartArc = value
+    end,
+
+    PERMISSION_REQUESTREQUESTTRANSFER = function(value)
+        io_Settings.Permissions.RequestTransfer = value
     end
 }
 
@@ -124,17 +129,18 @@ do
     InterfaceOptions.StopGroup()
 
     InterfaceOptions.StartGroup({label = "Default permissions for new whitelist entries", subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_DUEL",               label = "Duel",                 default = io_Settings.Permissions.Duel,                 subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_EMOTE",              label = "Emote",                default = io_Settings.Permissions.Emote,                subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_INVITE",             label = "Invite",               default = io_Settings.Permissions.Invite,               subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_JOINLEADER",         label = "JoinLeader",           default = io_Settings.Permissions.JoinLeader,           subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEGROUP",         label = "LeaveGroup",           default = io_Settings.Permissions.LeaveGroup,           subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",          label = "LeaveZone",            default = io_Settings.Permissions.LeaveZone,            subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",           label = "Location",             default = io_Settings.Permissions.Location,             subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",            label = "Promote",              default = io_Settings.Permissions.Promote,              subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",           label = "ReloadUI",             default = io_Settings.Permissions.ReloadUI,             subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",   label = "RequestCancelArc",     default = io_Settings.Permissions.RequestCancelArc,     subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTRESTARTARC",  label = "RequestRestartArc",    default = io_Settings.Permissions.RequestRestartArc,    subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_DUEL",                   label = "Duel",                 default = io_Settings.Permissions.Duel,                 subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_EMOTE",                  label = "Emote",                default = io_Settings.Permissions.Emote,                subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_INVITE",                 label = "Invite",               default = io_Settings.Permissions.Invite,               subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_JOINLEADER",             label = "JoinLeader",           default = io_Settings.Permissions.JoinLeader,           subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEGROUP",             label = "LeaveGroup",           default = io_Settings.Permissions.LeaveGroup,           subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",              label = "LeaveZone",            default = io_Settings.Permissions.LeaveZone,            subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",               label = "Location",             default = io_Settings.Permissions.Location,             subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",                label = "Promote",              default = io_Settings.Permissions.Promote,              subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",               label = "ReloadUI",             default = io_Settings.Permissions.ReloadUI,             subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",       label = "RequestCancelArc",     default = io_Settings.Permissions.RequestCancelArc,     subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTRESTARTARC",      label = "RequestRestartArc",    default = io_Settings.Permissions.RequestRestartArc,    subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTREQUESTTRANSFER", label = "RequestTransfer",      default = io_Settings.Permissions.RequestTransfer,      subtab = {"Permissions"}})
     InterfaceOptions.StopGroup({subtab = {"Permissions"}})
 end
 

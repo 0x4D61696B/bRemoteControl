@@ -65,7 +65,7 @@
     </BluePrints>
 
     <Frames>
-        <WindowFrame name="Main" dimensions="center-x: 50%; center-y: 50%; width: 600; height: 400" key="{bRC2 Options}" visible="false" style="movable: true" depth="0">
+        <WindowFrame name="Main" dimensions="center-x: 50%; center-y: 50%; width: 600; height: 425" key="{bRC2 Options}" visible="false" style="movable: true" depth="0">
             <Children>
                 <Group id="Window" dimensions="dock: fill" style="alpha: 1">
                     <Group id="Body" dimensions="top: 0; bottom: 100%; left: 0; right: 100%" blueprint="Panel"></Group>
