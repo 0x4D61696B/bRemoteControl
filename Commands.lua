@@ -484,7 +484,7 @@ function lf.OnSquadRosterUpdate()
         g_GroupInfo = false
     end
 
-    Debug.Table("g_GroupInfo", g_GroupInfo)
+    -- Debug.Table("g_GroupInfo", g_GroupInfo)
 end
 
 function lf.MyHudNote(args)
