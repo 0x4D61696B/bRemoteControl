@@ -63,6 +63,10 @@ function Commands.OnPreReloadUI(args)
     lf.OnPreReloadUI(args)
 end
 
+function Commands.OnSquadInviteReceived(args)
+    lf.OnSquadInviteReceived(args)
+end
+
 function Commands.OnSquadRosterUpdate(args)
     lf.OnSquadRosterUpdate(args)
 end
@@ -497,6 +501,12 @@ function lf.OnPreReloadUI(args)
     Debug.Event(args)
 
     Component.SaveSetting("g_ReloadUI", g_ReloadUI or Player.GetInfo())
+end
+
+function lf.OnSquadInviteReceived(args)
+    if (args.leader and Options.IsPlayerWhitelisted(args.leader) and not Options.IsPlayerBlocked(args.leader) and Options.HasPermission(args.leader, "Invite")) then
+        Squad.AcceptInvite(args.leader)
+    end
 end
 
 function lf.OnSquadRosterUpdate()

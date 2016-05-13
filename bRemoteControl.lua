@@ -117,6 +117,10 @@ function OnPreReloadUI(args)
     Commands.OnPreReloadUI(args)
 end
 
+function OnSquadInviteReceived(args)
+    Commands.OnSquadInviteReceived(args)
+end
+
 function OnSquadRosterUpdate(args)
     Commands.OnSquadRosterUpdate(args)
 end

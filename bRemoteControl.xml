@@ -13,15 +13,16 @@
     />
 
     <Events>
-        <Event name="ON_CHAT_MESSAGE"           bind="OnChatMessage"        />
-        <Event name="ON_COMPONENT_LOAD"         bind="OnComponentLoad"      />
-        <Event name="ON_COMPONENT_UNLOAD"       bind="OnComponentUnload"    />
-        <Event name="ON_DUEL_UPDATED"           bind="OnDuelUpdated"        />
-        <Event name="ON_LOADING_COMPLETE"       bind="OnLoadingComplete"    />
-        <Event name="ON_PLAYER_READY"           bind="OnPlayerReady"        />
-        <Event name="ON_PRE_RELOADUI"           bind="OnPreReloadUI"        />
-        <Event name="ON_SQUAD_ROSTER_UPDATE"    bind="OnSquadRosterUpdate"  />
-        <Event name="MY_HUD_NOTE"               bind="MyHudNote"            />
+        <Event name="ON_CHAT_MESSAGE"           bind="OnChatMessage"            />
+        <Event name="ON_COMPONENT_LOAD"         bind="OnComponentLoad"          />
+        <Event name="ON_COMPONENT_UNLOAD"       bind="OnComponentUnload"        />
+        <Event name="ON_DUEL_UPDATED"           bind="OnDuelUpdated"            />
+        <Event name="ON_LOADING_COMPLETE"       bind="OnLoadingComplete"        />
+        <Event name="ON_PLAYER_READY"           bind="OnPlayerReady"            />
+        <Event name="ON_PRE_RELOADUI"           bind="OnPreReloadUI"            />
+        <Event name="ON_SQUAD_INVITE_RECEIVED"  bind="OnSquadInviteReceived"    />
+        <Event name="ON_SQUAD_ROSTER_UPDATE"    bind="OnSquadRosterUpdate"      />
+        <Event name="MY_HUD_NOTE"               bind="MyHudNote"                />
     </Events>
 
     <BluePrints>
