@@ -456,6 +456,14 @@ function lf.OnChatMessage(args)
                     Game.RequestTransfer((type(requestedTransferZone) == "number" and requestedTransferZone or c_Zones[requestedTransferZone]))
                 end
             end
+
+        -- Stuck requests
+        elseif (unicode.match(text, "^!stuck") and Options.HasPermission(args.author, "Stuck")) then
+            Debug.Log("Stuck requested:", args.author)
+
+            Chat.SendWhisperText(args.author, "[bRC2] Executing myself, this will take a moment")
+            Game.Unstuck()
+            Notification("Unstucking, requested by " .. tostring(ChatLib.EncodePlayerLink(args.author)))
         end
     end
 end

@@ -35,7 +35,8 @@ c_DefaultPermissions = {
     ReloadUI            = false,
     RequestCancelArc    = false,
     RequestRestartArc   = false,
-    RequestTransfer     = false
+    RequestTransfer     = false,
+    Stuck               = false,
 }
 
 
@@ -115,6 +116,10 @@ local c_OptionsMap = {
 
     PERMISSION_REQUESTREQUESTTRANSFER = function(value)
         io_Settings.Permissions.RequestTransfer = value
+    end,
+
+    PERMISSION_STUCK = function(value)
+        io_Settings.Permissions.Stuck = value
     end
 }
 
@@ -141,6 +146,7 @@ do
         InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",       label = "RequestCancelArc",     default = io_Settings.Permissions.RequestCancelArc,     subtab = {"Permissions"}})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTRESTARTARC",      label = "RequestRestartArc",    default = io_Settings.Permissions.RequestRestartArc,    subtab = {"Permissions"}})
         InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTREQUESTTRANSFER", label = "RequestTransfer",      default = io_Settings.Permissions.RequestTransfer,      subtab = {"Permissions"}})
+        InterfaceOptions.AddCheckBox({id = "PERMISSION_STUCK",                  label = "Stuck",                default = io_Settings.Permissions.Stuck,                subtab = {"Permissions"}})
     InterfaceOptions.StopGroup({subtab = {"Permissions"}})
 end
 
