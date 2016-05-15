@@ -51,7 +51,7 @@
             <ListLayout name="Container" dimensions="top: 15; bottom: 100%; left: 0; right: 100%" style="vpadding: 0">
                 <Group name="Header" dimensions="top: 0; bottom: 30; left: 0; right: 100%" blueprint="OptionsLocalHeaderSection" />
                 <StillArt dimensions="left: 0; right: 100%-3; top: 30; height: 1" style="texture: colors; region: white; tint: #484848" />
-                <Group name="List" dimensions="top: 0; bottom: 100%; left: 25; right: 100%" style="vpadding: 0; clip-children: false" />
+                <Group name="List" dimensions="top: 0; bottom: 100%-35; left: 0; right: 100%" style="vpadding: 0; clip-children: false" />
             </ListLayout>
         </BluePrint>
 
