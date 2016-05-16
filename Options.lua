@@ -208,6 +208,18 @@ function Options.AddOrRemoveName(args)
     end
 end
 
+function Options.RemoveAllPlayers()
+    Debug.Log("Options.RemoveAllPlayers()")
+
+    g_PlayerPermissions = {}
+    Debug.Table("g_PlayerPermissions", g_PlayerPermissions)
+    Notification("Removed ALL whitelisted names")
+
+    Options.SaveSettings()
+    UI.UpdateUIState()
+    UI.SelectPlayer()
+end
+
 function Options.HasPermission(playerName, permissionName)
     Debug.Table("Options.HasPermission()", {playerName = playerName, permissionName = permissionName})
     return g_GlobalPermissions[permissionName] and (namecompare(playerName, Player.GetInfo()) or (Options.IsPlayerWhitelisted(playerName) and g_PlayerPermissions[ChatLib.StripArmyTag(playerName)][permissionName]))
@@ -232,8 +244,8 @@ function Options.SetGlobalPermission(permissionName, value)
     Options.SaveSettings()
 end
 
-function Options.GetPlayerPermissions()
-    return g_PlayerPermissions
+function Options.GetPlayerPermissions(playerName)
+    return (playerName and g_PlayerPermissions[playerName] or g_PlayerPermissions)
 end
 
 function Options.GetPlayerPermission(playerName, permissionName)

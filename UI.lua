@@ -90,7 +90,7 @@ function UI.Close()
 end
 
 function UI.GetSelectedPlayer()
-    return g_UI.SelectPlayer or ""
+    return g_UI.SelectedPlayer or ""
 end
 
 function UI.SelectPlayer(playerName)
@@ -175,7 +175,7 @@ function lf.CreateOptionCheckBox(name, PARENT, action, optionId, initCheck)
     CHOICE.CHECKBOX:SetDims("left:0; width:100%; height:22; top:0")
     CHOICE.CHECKBOX:SetText(name)
 
-    local text_dims = CHOICE.CHECKBOX:GetTextDims().width+5 -- Dunno what to do with this yet
+    -- local text_dims = CHOICE.CHECKBOX:GetTextDims().width+5 -- Dunno what to do with this yet
     --if text_dims > g_OptionsWidth then
     --    g_OptionsWidth = text_dims
     --end
@@ -185,7 +185,7 @@ end
 
 
 function lf.SetupGlobalUI(PANE)
-    Debug.Log("SetupGlobalUI")
+    Debug.Log("lf.SetupGlobalUI")
     -- Create list container in our tab body
     local globalUI = {GROUP = Component.CreateWidget("OptionsListPrint", PANE)} -- Created directly onto this tab body
     globalUI.LIST = globalUI.GROUP:GetChild("List")
@@ -226,7 +226,7 @@ function lf.SetupGlobalUI(PANE)
 end
 
 function lf.SetupLocalUI(PANE)
-    Debug.Log("SetupLocalUI")
+    Debug.Log("lf.SetupLocalUI")
 
     -- Instantiate header and list
     local localUI = {GROUP = Component.CreateWidget("OptionsListPrint2", PANE)} -- Created directly onto this tab body
@@ -243,6 +243,7 @@ function lf.SetupLocalUI(PANE)
                 function(args)
                     -- local selectedIndex = select(2, DROPDOWN:GetSelected())
                     local selectedValue = g_UI.w_SelectPlayerDropdown:GetSelected() -- In this case, the label is actually the value.
+                    Debug.Log("selectedValue", selectedValue)
                     g_UI.SelectedPlayer = (selectedValue ~= "" and selectedValue) or nil
                     lf.OnUIPlayerChanged()
                 end)
@@ -255,18 +256,18 @@ function lf.SetupLocalUI(PANE)
         -- Remove Player Button
         localUI.BUTTON_REMOVE_PLAYER = localUI.HEADER:GetChild("ButtonRemovePlayer")
             g_UI.w_ButtonRemovePlayer = localUI.BUTTON_REMOVE_PLAYER
-            localUI.BUTTON_REMOVE_PLAYER:SetText("Remove Player")
+            localUI.BUTTON_REMOVE_PLAYER:SetText("Remove player")
             localUI.BUTTON_REMOVE_PLAYER:SetParam("tint", "#FF0000")
             localUI.BUTTON_REMOVE_PLAYER:BindEvent("OnSubmit",
                 function()
                     -- Assert state
-                    assert(g_UI.SelectedPlayer)
+                    assert(UI.GetSelectedPlayer() ~= "")
 
                     -- Remove that player
                     ConfirmDialog.OpenConfirmDialog(
                         {
                             title               = "Confirm",
-                            message             = "Do you really want to remove " .. tostring(g_UI.SelectedPlayer) .. "?",
+                            message             = "Do you really want to remove " .. tostring(UI.GetSelectedPlayer()) .. "?",
                             enableInvisClose    = true,
                             posButtonKey        = "CONFIRM_BUTTON_TEXT",
                             posButtonColor      = "FF0000",
@@ -274,8 +275,8 @@ function lf.SetupLocalUI(PANE)
                         },
                         function(confirmed)
                             if (confirmed) then
-                                Debug.Log("Confirmed removal of", g_UI.SelectedPlayer)
-                                Options.AddOrRemoveName(g_UI.SelectedPlayer)
+                                Debug.Log("Confirmed removal of", UI.GetSelectedPlayer())
+                                Options.AddOrRemoveName(UI.GetSelectedPlayer())
                             end
                         end
                     )
@@ -286,7 +287,7 @@ function lf.SetupLocalUI(PANE)
         localUI.BUTTON_REMOVE_ALL = localUI.HEADER:GetChild("ButtonRemoveAll")
             g_UI.w_ButtonRemoveAll = localUI.BUTTON_REMOVE_ALL
             localUI.BUTTON_REMOVE_ALL:SetParam("tint", "#FF0000")
-            localUI.BUTTON_REMOVE_ALL:SetText("Remove All")
+            localUI.BUTTON_REMOVE_ALL:SetText("Remove all")
             localUI.BUTTON_REMOVE_ALL:BindEvent("OnSubmit",
                 function()
                     ConfirmDialog.OpenConfirmDialog(
@@ -301,7 +302,7 @@ function lf.SetupLocalUI(PANE)
                         function(confirmed)
                             if (confirmed) then
                                 Debug.Log("Confirmed removal of all players")
-                                lf.RemoveAllPlayers()
+                                Options.RemoveAllPlayers()
                             end
                         end
                     )
@@ -332,14 +333,13 @@ function lf.SetupLocalUI(PANE)
                 -- OnStateChange Handler
                 function(value)
                     -- Assert state
-                    assert(g_UI.SelectedPlayer) -- We must have a selected player in order to change his options
-                    assert(type(Options.GetPlayerPermissions()[g_UI.SelectedPlayer]) == "table") -- There must be a permissions table for the selected player
-                    -- assert(g_PlayerPermissions[g_UI.SelectedPlayer][permissionKey] ~= nil) -- That permissions table must have a key for the option we are changing
+                    assert(UI.GetSelectedPlayer() ~= "") -- We must have a selected player in order to change his options
+                    assert(type(Options.GetPlayerPermissions(UI.GetSelectedPlayer())) == "table") -- There must be a permissions table for the selected player
 
                     -- Change that player's permissions
-                    Options.SetPlayerPermission(g_UI.SelectedPlayer, permissionKey, value)
+                    Options.SetPlayerPermission(UI.GetSelectedPlayer(), permissionKey, value)
                 end,
-            permissionKey, Options.GetGlobalPermission(permissionKey)) -- Default value being sent here
+            permissionKey, c_DefaultPermissions[permissionKey]) -- Default value being sent here
 
             -- Disable for now
             CHOICE.CHECKBOX:Disable()
@@ -355,30 +355,37 @@ function lf.SetupLocalUI(PANE)
         localUI.SCROLLER:UpdateSize()
 end
 
-function lf.RemoveAllPlayers()
-    Debug.Log("Removing All Players")
-
-    for player in pairs(Options.GetPlayerPermissions()) do
-        Options.AddOrRemoveName(player)
-    end
-end
-
 function lf.UpdateUIState()
+    Debug.Log("lf.UpdateUIState()")
     lf.RepopulatePlayerDropdown()
 
     local haveAtLeastOnePlayer = (next(Options.GetPlayerPermissions())) or false
+
     if haveAtLeastOnePlayer then
-        if g_UI.SelectedPlayer then
+        if (UI.GetSelectedPlayer() ~= "") then
             g_UI.w_ButtonRemovePlayer:Enable()
         end
+
         g_UI.w_ButtonRemoveAll:Enable()
+
     else
+        Debug.Log("No whitelisted players, disabling buttons and checkboxes")
+
+        -- Disable remove buttons
         g_UI.w_ButtonRemovePlayer:Disable()
         g_UI.w_ButtonRemoveAll:Disable()
+
+        -- Uncheck all checkboxes and disable them
+        for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
+            CHOICE.CHECKBOX:SetCheck(false)
+            CHOICE.CHECKBOX:Disable()
+        end
     end
 end
 
 function lf.RepopulatePlayerDropdown()
+    Debug.Log("lf.RepopulatePlayerDropdown()")
+
     if not g_UI.w_SelectPlayerDropdown then
         Debug.Warn("RepopulatePlayerDropdown called before player dropdown was created :(")
         return
@@ -409,19 +416,24 @@ end
 
 
 function lf.OnUIPlayerChanged()
+    Debug.Log("lf.OnUIPlayerChanged()")
+
     -- Get player
-    local player = g_UI.SelectedPlayer
+    local player = UI.GetSelectedPlayer()
 
     -- We have a player, proceed enabling/disabling checkboxes based on permissionKeys
-    if player ~= nil and player ~= "" then
+    if player ~= "" then
         -- Get permissions
-        local playerPermissions = Options.GetPlayerPermissions()[player]
+        local playerPermissions = Options.GetPlayerPermissions(player)
 
         -- Load new permission values into checkboxes
         for permissionKey, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
             -- Get checkbox reference and permissionValue for this permissionKey
             local CHECKBOX = CHOICE.CHECKBOX
             local permissionValue = playerPermissions[permissionKey]
+
+            -- Enable the checkbox
+            CHECKBOX:Enable()
 
             -- Set the Checkbox to the appropriate state if we have a value for the key
             if permissionValue ~= nil then
@@ -435,15 +447,14 @@ function lf.OnUIPlayerChanged()
                 Options.SetPlayerPermission(player, permissionKey, defaultPermission)
                 CHECKBOX:SetCheck(defaultPermission)
             end
-
-            -- Enable the checkbox
-            CHECKBOX:Enable()
         end
 
     -- We have no player, disable all checkboxes
     else
         Debug.Log("No player selected, disabling all checkboxes")
+
         for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
+            CHOICE.CHECKBOX:SetCheck(false)
             CHOICE.CHECKBOX:Disable()
         end
     end
