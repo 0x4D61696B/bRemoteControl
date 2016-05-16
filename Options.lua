@@ -109,6 +109,7 @@ local io_Settings   = {
     Debug           = false,
     Enabled         = false,
     ForwardInvite   = false,
+    OpenOnAdd       = false,
     Permissions     = c_DefaultPermissions
 }
 
@@ -123,6 +124,10 @@ local c_OptionsMap = {
 
     GROUP_FORWARD_INVITE = function(value)
         io_Settings.ForwardInvite = value
+    end,
+
+    UI_OPEN_ON_ADD = function(value)
+        io_Settings.OpenOnAdd = value
     end
 }
 
@@ -134,6 +139,7 @@ do
     InterfaceOptions.StartGroup({label = "Miscellanous"})
         InterfaceOptions.AddCheckBox({id = "DEBUG_MODE",            label = "Debug mode",               default = io_Settings.Debug})
         InterfaceOptions.AddCheckBox({id = "GROUP_FORWARD_INVITE",  label = "Forward invite requests",  default = io_Settings.ForwardInvite})
+        InterfaceOptions.AddCheckBox({id = "UI_OPEN_ON_ADD",        label = "Open GUI after adding",    default = io_Settings.OpenOnAdd})
     InterfaceOptions.StopGroup()
 
     InterfaceOptions.StartGroup({label = "Default permissions for new whitelist entries", subtab = {"Permissions"}})
@@ -280,6 +286,10 @@ function Options.IsInviteForwardEnabled()
     return io_Settings.ForwardInvite
 end
 
+function Options.IsOpenOnAddEnabled()
+    return io_Settings.OpenOnAdd
+end
+
 
 -- =============================================================================
 --  Local Functions
@@ -291,24 +301,28 @@ function lf.AddOrRemoveName(playerName)
     if (g_PlayerPermissions[playerName]) then
         g_PlayerPermissions[playerName] = nil
 
+        Notification("Removed " .. tostring(ChatLib.EncodePlayerLink(playerName)) .. " from whitelist")
+
+        -- UI needs to be updated since we've removed a player
+        UI.UpdateUIState()
+
         if (namecompare(playerName, UI.GetSelectedPlayer())) then
             UI.SelectPlayer()
         end
-
-        Notification("Removed " .. tostring(ChatLib.EncodePlayerLink(playerName)) .. " from whitelist")
 
     else
         Debug.Table("io_Settings.Permissions", io_Settings.Permissions)
         g_PlayerPermissions[playerName] = io_Settings.Permissions
 
         Notification("Added " .. tostring(ChatLib.EncodePlayerLink(playerName)) .. " to whitelist")
+
+        -- UI needs to be updated since we've added a player
+        UI.UpdateUIState()
+        UI.SelectPlayer(playerName)
     end
 
     Debug.Table(playerName, g_PlayerPermissions[playerName])
     Options.SaveSettings()
-
-    -- UI needs to be updated since we've added/removed a player
-    UI.UpdateUIState()
 end
 
 function lf.OnOptionChanged(id, value)

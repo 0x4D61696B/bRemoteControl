@@ -52,7 +52,8 @@ c_UI.TabIndex     = { -- Because we can't reference it from within itself :D
 --  Variables
 -- =============================================================================
 
-local g_FrameShown = false
+local g_FrameShown  = false
+local g_PlayerMap   = {}
 
 local g_UI = {
     SelectedPlayer          = nil,
@@ -94,8 +95,15 @@ function UI.GetSelectedPlayer()
 end
 
 function UI.SelectPlayer(playerName)
-    if (playerName) then
-        -- TODO: After adding a player, select the newly added player and open the UI?
+    if (playerName and g_PlayerMap[playerName]) then
+        g_UI.w_SelectPlayerDropdown:SetSelectedByIndex(g_PlayerMap[playerName])
+
+        -- If enabled, open UI
+        if (Options.IsOpenOnAddEnabled()) then
+            g_UI.Tabs:Select(c_UI.TabId.Local)
+            UI.Open()
+        end
+
     else
         Debug.Warn("Forcibly changing SelectPlayerDropdown because user removed the player that was selected") -- TODO: Not a warning
         g_UI.w_SelectPlayerDropdown:SetSelectedByIndex(1)
@@ -393,6 +401,7 @@ function lf.RepopulatePlayerDropdown()
 
     -- Clear existing items
     g_UI.w_SelectPlayerDropdown:ClearItems()
+    g_PlayerMap = {}
 
     -- Sort the player names
     local playerList = {}
@@ -404,13 +413,19 @@ function lf.RepopulatePlayerDropdown()
     table.sort(playerList, function(a, b) return unicode.lower(a) < unicode.lower(b) end)
 
     -- Add item for each player
-    for _, playerName in pairs(playerList) do
+    for i, playerName in pairs(playerList) do
         g_UI.w_SelectPlayerDropdown:AddItem(playerName)
+        g_PlayerMap[playerName] = i
     end
 
-    -- Attempt to auto select a player if we don't have one
-    if not g_UI.SelectedPlayer then
-        g_UI.w_SelectPlayerDropdown:SetSelectedByIndex(1)
+    -- Attempt to auto select a player
+    if (#playerList > 0) then
+        if (UI.GetSelectedPlayer() == "" or not g_PlayerMap[UI.GetSelectedPlayer()]) then
+            g_UI.w_SelectPlayerDropdown:SetSelectedByIndex(1)
+
+        elseif (g_PlayerMap[UI.GetSelectedPlayer()]) then
+            g_UI.w_SelectPlayerDropdown:SetSelectedByIndex(g_PlayerMap[UI.GetSelectedPlayer()])
+        end
     end
 end
 
