@@ -305,7 +305,7 @@ function lf.AddOrRemoveName(playerName)
 
     else
         Debug.Table("io_Settings.Permissions", io_Settings.Permissions)
-        g_PlayerPermissions[playerName] = io_Settings.Permissions
+        g_PlayerPermissions[playerName] = _table.copy(io_Settings.Permissions)
 
         Notification("Added " .. tostring(ChatLib.EncodePlayerLink(playerName)) .. " to whitelist")
 
