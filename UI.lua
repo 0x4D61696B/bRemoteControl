@@ -8,6 +8,7 @@ if (UI) then
     return
 end
 
+require "lib/lib_ConfirmDialog"
 require "lib/lib_HudManager"
 require "lib/lib_RowScroller"
 require "lib/lib_Tabs"
@@ -262,7 +263,22 @@ function lf.SetupLocalUI(PANE)
                     assert(g_UI.SelectedPlayer)
 
                     -- Remove that player
-                    Options.AddOrRemoveName(g_UI.SelectedPlayer)
+                    ConfirmDialog.OpenConfirmDialog(
+                        {
+                            title               = "Confirm",
+                            message             = "Do you really want to remove " .. tostring(g_UI.SelectedPlayer) .. "?",
+                            enableInvisClose    = true,
+                            posButtonKey        = "CONFIRM_BUTTON_TEXT",
+                            posButtonColor      = "FF0000",
+                            negButtonKey        = "CANCEL"
+                        },
+                        function(confirmed)
+                            if (confirmed) then
+                                Debug.Log("Confirmed removal of", g_UI.SelectedPlayer)
+                                Options.AddOrRemoveName(g_UI.SelectedPlayer)
+                            end
+                        end
+                    )
                 end
             )
 
@@ -273,10 +289,22 @@ function lf.SetupLocalUI(PANE)
             localUI.BUTTON_REMOVE_ALL:SetText("Remove All")
             localUI.BUTTON_REMOVE_ALL:BindEvent("OnSubmit",
                 function()
-                    -- TODO: Implement a Popup Confirmation for this action
-
-                    -- Remove all players
-                    lf.RemoveAllPlayers()
+                    ConfirmDialog.OpenConfirmDialog(
+                        {
+                            title               = "Confirm",
+                            message             = "Do you really want to remove ALL whitelisted players?",
+                            enableInvisClose    = true,
+                            posButtonKey        = "CONFIRM_BUTTON_TEXT",
+                            posButtonColor      = "FF0000",
+                            negButtonKey        = "CANCEL"
+                        },
+                        function(confirmed)
+                            if (confirmed) then
+                                Debug.Log("Confirmed removal of all players")
+                                lf.RemoveAllPlayers()
+                            end
+                        end
+                    )
                 end
             )
 
