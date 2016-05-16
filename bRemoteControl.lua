@@ -48,6 +48,7 @@ function OnOpen(args)
 end
 
 function OnPlayerMenuShow(playerName)
+    -- Don't add the menu for the local player
     if (not namecompare(playerName, Player.GetInfo())) then
         local playerName = ChatLib.StripArmyTag(playerName)
         local MENU = PlayerMenu:AddMenu({label = "bRC2", menu = "bRC2_Menu"})
@@ -61,6 +62,7 @@ end
 function OnSlashCommand(args)
     if (args[1] and unicode.len(args[1]) > 0) then
         Options.AddOrRemoveName(args[1])
+
     else
         OnOpen()
     end
@@ -80,6 +82,7 @@ function OnComponentLoad()
         autocomplete_name   = 1
     })
 
+    -- Add a menu to the player menu (right click on characters/names)
     PlayerMenu.BindOnShow(OnPlayerMenuShow)
 
     -- Register the custom chat link

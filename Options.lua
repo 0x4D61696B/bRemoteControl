@@ -36,7 +36,7 @@ c_DefaultPermissions = {
     RequestCancelArc    = false,
     RequestRestartArc   = false,
     RequestTransfer     = false,
-    Stuck               = false,
+    Stuck               = false
 }
 
 
@@ -68,58 +68,6 @@ local c_OptionsMap = {
 
     GROUP_FORWARD_INVITE = function(value)
         io_Settings.ForwardInvite = value
-    end,
-
-    PERMISSION_DUEL = function(value)
-        io_Settings.Permissions.Duel = value
-    end,
-
-    PERMISSION_EMOTE = function(value)
-        io_Settings.Permissions.Emote = value
-    end,
-
-    PERMISSION_INVITE = function(value)
-        io_Settings.Permissions.Invite = value
-    end,
-
-    PERMISSION_JOINLEADER = function(value)
-        io_Settings.Permissions.JoinLeader = value
-    end,
-
-    PERMISSION_LEAVEGROUP = function(value)
-        io_Settings.Permissions.LeaveGroup = value
-    end,
-
-    PERMISSION_LEAVEZONE = function(value)
-        io_Settings.Permissions.LeaveZone = value
-    end,
-
-    PERMISSION_LOCATION = function(value)
-        io_Settings.Permissions.Location = value
-    end,
-
-    PERMISSION_PROMOTE = function(value)
-        io_Settings.Permissions.Promote = value
-    end,
-
-    PERMISSION_RELOADUI = function(value)
-        io_Settings.Permissions.ReloadUI = value
-    end,
-
-    PERMISSION_REQUESTCANCELARC = function(value)
-        io_Settings.Permissions.RequestCancelArc = value
-    end,
-
-    PERMISSION_REQUESTRESTARTARC = function(value)
-        io_Settings.Permissions.RequestRestartArc = value
-    end,
-
-    PERMISSION_REQUESTREQUESTTRANSFER = function(value)
-        io_Settings.Permissions.RequestTransfer = value
-    end,
-
-    PERMISSION_STUCK = function(value)
-        io_Settings.Permissions.Stuck = value
     end
 }
 
@@ -134,19 +82,29 @@ do
     InterfaceOptions.StopGroup()
 
     InterfaceOptions.StartGroup({label = "Default permissions for new whitelist entries", subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_DUEL",                   label = "Duel",                 default = io_Settings.Permissions.Duel,                 subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_EMOTE",                  label = "Emote",                default = io_Settings.Permissions.Emote,                subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_INVITE",                 label = "Invite",               default = io_Settings.Permissions.Invite,               subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_JOINLEADER",             label = "JoinLeader",           default = io_Settings.Permissions.JoinLeader,           subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEGROUP",             label = "LeaveGroup",           default = io_Settings.Permissions.LeaveGroup,           subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LEAVEZONE",              label = "LeaveZone",            default = io_Settings.Permissions.LeaveZone,            subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_LOCATION",               label = "Location",             default = io_Settings.Permissions.Location,             subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_PROMOTE",                label = "Promote",              default = io_Settings.Permissions.Promote,              subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_RELOADUI",               label = "ReloadUI",             default = io_Settings.Permissions.ReloadUI,             subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTCANCELARC",       label = "RequestCancelArc",     default = io_Settings.Permissions.RequestCancelArc,     subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTRESTARTARC",      label = "RequestRestartArc",    default = io_Settings.Permissions.RequestRestartArc,    subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_REQUESTREQUESTTRANSFER", label = "RequestTransfer",      default = io_Settings.Permissions.RequestTransfer,      subtab = {"Permissions"}})
-        InterfaceOptions.AddCheckBox({id = "PERMISSION_STUCK",                  label = "Stuck",                default = io_Settings.Permissions.Stuck,                subtab = {"Permissions"}})
+        local permissionList = {}
+
+        for permissionName in pairs(c_DefaultPermissions) do
+            table.insert(permissionList, permissionName)
+        end
+
+        table.sort(permissionList, function(a, b) return a < b end)
+
+        for i = 1, #permissionList do
+            -- Add permission to c_OptionsMap
+            c_OptionsMap["PERMISSION_" .. unicode.upper(permissionList[i])] = function(value)
+                io_Settings.Permissions[permissionList[i]] = value
+                Debug.Table(permissionList[i], io_Settings.Permissions[permissionList[i]])
+            end
+
+            -- Generate Interface Options entry
+            InterfaceOptions.AddCheckBox({
+                id      = "PERMISSION_" .. unicode.upper(permissionList[i]),
+                label   = permissionList[i],
+                default = c_DefaultPermissions[permissionList[i]],
+                subtab  = {"Permissions"}
+            })
+        end
     InterfaceOptions.StopGroup({subtab = {"Permissions"}})
 end
 
@@ -188,6 +146,7 @@ function Options.AddOrRemoveName(args)
 
     if (namecompare(args, Player.GetInfo())) then
         Notification("You can't add yourself to the whitelist")
+
     else
         lf.AddOrRemoveName(args)
     end
@@ -241,6 +200,7 @@ end
 function Options.SetPlayerBlocked(playerName, value)
     if (value) then
         g_BlockedPlayers[playerName] = true
+
     else
         g_BlockedPlayers[playerName] = nil
     end
@@ -268,21 +228,15 @@ function lf.AddOrRemoveName(playerName)
         end
 
         Notification("Removed " .. tostring(ChatLib.EncodePlayerLink(playerName)) .. " from whitelist")
+
     else
-        g_PlayerPermissions[playerName] = {
-            Duel        = io_Settings.Permissions.Duel,
-            Emote       = io_Settings.Permissions.Emote,
-            Invite      = io_Settings.Permissions.Invite,
-            JoinLeader  = io_Settings.Permissions.JoinLeader,
-            LeaveZone   = io_Settings.Permissions.LeaveZone,
-            Location    = io_Settings.Permissions.Location,
-            Promote     = io_Settings.Permissions.Promote
-        }
+        Debug.Table("io_Settings.Permissions", io_Settings.Permissions)
+        g_PlayerPermissions[playerName] = io_Settings.Permissions
 
         Notification("Added " .. tostring(ChatLib.EncodePlayerLink(playerName)) .. " to whitelist")
     end
 
-    Debug.Table("g_PlayerPermissions", g_PlayerPermissions)
+    Debug.Table(playerName, g_PlayerPermissions[playerName])
     Options.SaveSettings()
 
     -- UI needs to be updated since we've added/removed a player
@@ -292,6 +246,7 @@ end
 function lf.OnOptionChanged(id, value)
     if (c_OptionsMap[id]) then
         c_OptionsMap[id](value)
+
     else
         Debug.Warn("Unhandled message:", id)
     end

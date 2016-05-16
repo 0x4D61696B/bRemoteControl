@@ -317,6 +317,7 @@ end
 
 function lf.RemoveAllPlayers()
     Debug.Log("Removing All Players")
+
     for player in pairs(Options.GetPlayerPermissions()) do
         Options.AddOrRemoveName(player)
     end
@@ -338,7 +339,10 @@ function lf.UpdateUIState()
 end
 
 function lf.RepopulatePlayerDropdown()
-    if not g_UI.w_SelectPlayerDropdown then Debug.Warn("RepopulatePlayerDropdown called before player dropdown was created :(") return end
+    if not g_UI.w_SelectPlayerDropdown then
+        Debug.Warn("RepopulatePlayerDropdown called before player dropdown was created :(")
+        return
+    end
 
     -- Clear existing items
     g_UI.w_SelectPlayerDropdown:ClearItems()
