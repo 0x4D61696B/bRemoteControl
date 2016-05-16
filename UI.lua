@@ -61,6 +61,7 @@ local g_UI = {
     w_ButtonRemoveAll       = nil,
     w_ButtonRemovePlayer    = nil,
     w_PlayerCheckboxes      = {},
+    w_PlayerBlockedCheckbox = nil,
     w_SelectPlayerDropdown  = nil,
     w_TabPanes              = {},
 }
@@ -256,10 +257,24 @@ function lf.SetupLocalUI(PANE)
                     lf.OnUIPlayerChanged()
                 end)
 
+            -- Disable for now
+            localUI.SELECT_PLAYER:Disable()
+
         -- Player Block Checkbox
         localUI.CHOICE_BLOCK_PLAYER = localUI.HEADER:GetChild("ChoiceBlockPlayer")
+            g_UI.w_PlayerBlockedCheckbox = localUI.CHOICE_BLOCK_PLAYER
             localUI.CHOICE_BLOCK_PLAYER:SetText("Block")
-            localUI.CHOICE_BLOCK_PLAYER:Show(true) -- TODO: This was kind of a random thought, to have the option to tempoarily "ignore" a player. Incase Plebsis acts up, for example. :)
+            localUI.CHOICE_BLOCK_PLAYER:Show(true)
+            localUI.CHOICE_BLOCK_PLAYER:BindEvent("OnStateChanged", function(args)
+                Debug.Table("CHOICE_BLOCK_PLAYER", args)
+
+                if (UI.GetSelectedPlayer() ~= "") then
+                    Options.SetPlayerBlocked(UI.GetSelectedPlayer(), args.checked)
+                end
+            end)
+
+            -- Disable for now
+            localUI.CHOICE_BLOCK_PLAYER:Disable()
 
         -- Remove Player Button
         localUI.BUTTON_REMOVE_PLAYER = localUI.HEADER:GetChild("ButtonRemovePlayer")
@@ -370,6 +385,8 @@ function lf.UpdateUIState()
     local haveAtLeastOnePlayer = (next(Options.GetPlayerPermissions())) or false
 
     if haveAtLeastOnePlayer then
+        g_UI.w_SelectPlayerDropdown:Enable()
+
         if (UI.GetSelectedPlayer() ~= "") then
             g_UI.w_ButtonRemovePlayer:Enable()
         end
@@ -378,6 +395,13 @@ function lf.UpdateUIState()
 
     else
         Debug.Log("No whitelisted players, disabling buttons and checkboxes")
+
+        -- Disable the dropdown
+        g_UI.w_SelectPlayerDropdown:Disable()
+
+        -- Disable block checkbox
+        g_UI.w_PlayerBlockedCheckbox:SetCheck(false)
+        g_UI.w_PlayerBlockedCheckbox:Disable()
 
         -- Disable remove buttons
         g_UI.w_ButtonRemovePlayer:Disable()
@@ -438,6 +462,10 @@ function lf.OnUIPlayerChanged()
 
     -- We have a player, proceed enabling/disabling checkboxes based on permissionKeys
     if player ~= "" then
+        -- Set the blocked checkbox
+        g_UI.w_PlayerBlockedCheckbox:Enable()
+        g_UI.w_PlayerBlockedCheckbox:SetCheck(Options.IsPlayerBlocked(player))
+
         -- Get permissions
         local playerPermissions = Options.GetPlayerPermissions(player)
 
@@ -467,6 +495,8 @@ function lf.OnUIPlayerChanged()
     -- We have no player, disable all checkboxes
     else
         Debug.Log("No player selected, disabling all checkboxes")
+        g_UI.w_PlayerBlockedCheckbox:SetCheck(false)
+        g_UI.w_PlayerBlockedCheckbox:Disable()
 
         for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
             CHOICE.CHECKBOX:SetCheck(false)

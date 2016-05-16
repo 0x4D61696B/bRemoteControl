@@ -99,8 +99,6 @@ Usage: !stuck]]
 --  Variables
 -- =============================================================================
 
-local g_BlockedPlayers = {}
-
 local g_GlobalPermissions = c_DefaultPermissions
 
 local g_PlayerPermissions = {}
@@ -180,10 +178,6 @@ function Options.Setup()
     InterfaceOptions.SetCallbackFunc(lf.OnOptionChanged)
 
     -- Get the saved options
-    if (Component.GetSetting("g_BlockedPlayers")) then
-        g_GlobalPermissions = Component.GetSetting("g_BlockedPlayers")
-    end
-
     if (Component.GetSetting("g_GlobalPermissions")) then
         g_GlobalPermissions = Component.GetSetting("g_GlobalPermissions")
     end
@@ -198,7 +192,6 @@ function Options.IsAddonEnabled()
 end
 
 function Options.SaveSettings()
-    Component.SaveSetting("g_BlockedPlayers", g_BlockedPlayers)
     Component.SaveSetting("g_GlobalPermissions", g_GlobalPermissions)
     Component.SaveSetting("g_PlayerPermissions", g_PlayerPermissions)
 end
@@ -268,15 +261,15 @@ function Options.SetPlayerPermission(playerName, permissionName, value)
 end
 
 function Options.IsPlayerBlocked(playerName)
-    return g_BlockedPlayers[ChatLib.StripArmyTag(playerName)] or false
+    return g_PlayerPermissions[playerName].IsBlocked or false
 end
 
 function Options.SetPlayerBlocked(playerName, value)
     if (value) then
-        g_BlockedPlayers[playerName] = true
+        g_PlayerPermissions[playerName].IsBlocked = true
 
     else
-        g_BlockedPlayers[playerName] = nil
+        g_PlayerPermissions[playerName].IsBlocked = nil
     end
 
     Options.SaveSettings()
