@@ -11,6 +11,7 @@ end
 require "lib/lib_HudManager"
 require "lib/lib_RowScroller"
 require "lib/lib_Tabs"
+require "lib/lib_Tooltip"
 
 local lf = {}
 
@@ -83,6 +84,7 @@ end
 function UI.Close()
     g_FrameShown = false
     Component.SetInputMode("default")
+    Tooltip.Show(nil)
     FRAME:Show(false)
 end
 
@@ -153,10 +155,20 @@ function lf.CreateOptionCheckBox(name, PARENT, action, optionId, initCheck)
 
     -- Bind state change
     CHOICE.CHECKBOX:BindEvent("OnStateChanged", function(args)
-            if args.user then
-                action(CHOICE.CHECKBOX:GetCheck())
-            end
-        end)
+        if args.user then
+            action(CHOICE.CHECKBOX:GetCheck())
+        end
+    end)
+
+    CHOICE.CHECKBOX:BindEvent("OnMouseEnter", function(args)
+        if (c_PermissionDescriptions[name]) then
+            Tooltip.Show(c_PermissionDescriptions[name], {halign = "left"})
+        end
+    end)
+
+    CHOICE.CHECKBOX:BindEvent("OnMouseLeave", function(args)
+        Tooltip.Show(nil)
+    end)
 
     -- Finish it
     CHOICE.CHECKBOX:SetDims("left:0; width:100%; height:22; top:0")

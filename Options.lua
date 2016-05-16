@@ -39,6 +39,61 @@ c_DefaultPermissions = {
     Stuck               = false
 }
 
+-- Permission descriptions
+c_PermissionDescriptions = {}
+
+c_PermissionDescriptions.Duel = [[Allows the usage of the !duel command.
+
+Usage: !d]]
+
+c_PermissionDescriptions.Emote = [[Allows the usage of the !emote <emote> command.
+
+Usage: !e dance]]
+
+c_PermissionDescriptions.Invite = [[Allows the usage of the !invite command.
+
+Usage: !i]]
+
+c_PermissionDescriptions.JoinLeader = [[Allows the usage of the !jl command.
+
+Usage: !jl]]
+
+c_PermissionDescriptions.LeaveGroup = [[Allows the usage of the !lg command.
+
+Usage: !lg]]
+
+c_PermissionDescriptions.LeaveZone = [[Allows the usage of the !lz command.
+
+Usage: !lz]]
+
+c_PermissionDescriptions.Location = [[Allows the usage of the !loc command.
+
+Usage: !loc]]
+
+c_PermissionDescriptions.Promote = [[Allows the usage of the !promote command.
+
+Usage: !p]]
+
+c_PermissionDescriptions.ReloadUI = [[Allows the usage of the !rui command.
+
+Usage: !rui]]
+
+c_PermissionDescriptions.RequestCancelArc = [[Allows the usage of the !rca command.
+
+Usage: !rca]]
+
+c_PermissionDescriptions.RequestRestartArc = [[Allows the usage of the !rra command.
+
+Usage: !rra]]
+
+c_PermissionDescriptions.RequestTransfer = [[Allows the usage of the !rt command.
+
+Usage: !rt DevilsTusk]]
+
+c_PermissionDescriptions.Stuck = [[Allows the usage of the !stuck command.
+
+Usage: !stuck]]
+
 
 -- =============================================================================
 --  Variables
@@ -101,6 +156,7 @@ do
             InterfaceOptions.AddCheckBox({
                 id      = "PERMISSION_" .. unicode.upper(permissionList[i]),
                 label   = permissionList[i],
+                tooltip = (c_PermissionDescriptions[permissionList[i]] or nil),
                 default = c_DefaultPermissions[permissionList[i]],
                 subtab  = {"Permissions"}
             })
