@@ -92,7 +92,7 @@ function UI.Close()
 end
 
 function UI.GetSelectedPlayer()
-    return g_UI.SelectedPlayer or ""
+    return g_UI.w_SelectPlayerDropdown:GetSelected() or ""
 end
 
 function UI.SelectPlayer(playerName)
@@ -141,6 +141,46 @@ function lf.SetupUI()
 
     -- Set default tab
     g_UI.Tabs:Select(c_UI.TabId.Global)
+end
+
+function lf.EnablePlayerPermissions()
+    Debug.Log("lf.EnablePlayerPermissions()")
+
+    -- Enable the dropdown
+    g_UI.w_SelectPlayerDropdown:Enable()
+
+    -- Enable block checkbox
+    g_UI.w_PlayerBlockedCheckbox:Enable()
+
+    -- Enable remove buttons
+    g_UI.w_ButtonRemovePlayer:Enable()
+    g_UI.w_ButtonRemoveAll:Enable()
+
+    -- Enable all checkboxes
+    for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
+        CHOICE.CHECKBOX:Enable()
+    end
+end
+
+function lf.DisablePlayerPermissions()
+    Debug.Log("lf.DisablePlayerPermissions()")
+
+    -- Disable the dropdown
+    g_UI.w_SelectPlayerDropdown:Disable()
+
+    -- Disable block checkbox
+    g_UI.w_PlayerBlockedCheckbox:SetCheck(false)
+    g_UI.w_PlayerBlockedCheckbox:Disable()
+
+    -- Disable remove buttons
+    g_UI.w_ButtonRemovePlayer:Disable()
+    g_UI.w_ButtonRemoveAll:Disable()
+
+    -- Uncheck all checkboxes and disable them
+    for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
+        CHOICE.CHECKBOX:SetCheck(false)
+        CHOICE.CHECKBOX:Disable()
+    end
 end
 
 function lf.OnUITabChanged(args)
@@ -213,7 +253,9 @@ function lf.SetupGlobalUI(PANE)
         table.insert(permissionList, key)
     end
 
-    table.sort(permissionList, function(a, b) return a < b end)
+    table.sort(permissionList, function(a, b)
+        return unicode.lower(a) < unicode.lower(b) end
+    )
 
     for _, permissionKey in pairs(permissionList) do
         -- Create CheckBox
@@ -253,7 +295,7 @@ function lf.SetupLocalUI(PANE)
                     -- local selectedIndex = select(2, DROPDOWN:GetSelected())
                     local selectedValue = g_UI.w_SelectPlayerDropdown:GetSelected() -- In this case, the label is actually the value.
                     Debug.Log("selectedValue", selectedValue)
-                    g_UI.SelectedPlayer = (selectedValue ~= "" and selectedValue) or nil
+                    g_UI.SelectedPlayer = (selectedValue ~= "" and selectedValue) or ""
                     lf.OnUIPlayerChanged()
                 end)
 
@@ -347,7 +389,9 @@ function lf.SetupLocalUI(PANE)
             table.insert(permissionList, key)
         end
 
-        table.sort(permissionList, function(a, b) return a < b end)
+        table.sort(permissionList, function(a, b)
+            return unicode.lower(a) < unicode.lower(b)
+        end)
 
         -- Create checkboxes and add them to the scrolling list
         for _, permissionKey in pairs(permissionList) do
@@ -384,34 +428,9 @@ function lf.UpdateUIState()
 
     local haveAtLeastOnePlayer = (next(Options.GetPlayerPermissions())) or false
 
-    if haveAtLeastOnePlayer then
-        g_UI.w_SelectPlayerDropdown:Enable()
-
-        if (UI.GetSelectedPlayer() ~= "") then
-            g_UI.w_ButtonRemovePlayer:Enable()
-        end
-
-        g_UI.w_ButtonRemoveAll:Enable()
-
-    else
+    if (not haveAtLeastOnePlayer) then
         Debug.Log("No whitelisted players, disabling buttons and checkboxes")
-
-        -- Disable the dropdown
-        g_UI.w_SelectPlayerDropdown:Disable()
-
-        -- Disable block checkbox
-        g_UI.w_PlayerBlockedCheckbox:SetCheck(false)
-        g_UI.w_PlayerBlockedCheckbox:Disable()
-
-        -- Disable remove buttons
-        g_UI.w_ButtonRemovePlayer:Disable()
-        g_UI.w_ButtonRemoveAll:Disable()
-
-        -- Uncheck all checkboxes and disable them
-        for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
-            CHOICE.CHECKBOX:SetCheck(false)
-            CHOICE.CHECKBOX:Disable()
-        end
+        lf.DisablePlayerPermissions()
     end
 end
 
@@ -462,12 +481,11 @@ function lf.OnUIPlayerChanged()
 
     -- We have a player, proceed enabling/disabling checkboxes based on permissionKeys
     if player ~= "" then
-        -- Set the blocked checkbox
-        g_UI.w_PlayerBlockedCheckbox:Enable()
-        g_UI.w_PlayerBlockedCheckbox:SetCheck(Options.IsPlayerBlocked(player))
+        -- Enable all the shiz
+        lf.EnablePlayerPermissions()
 
-        -- Enable the remove player buttons
-        g_UI.w_ButtonRemovePlayer:Enable()
+        -- Set the blocked checkbox
+        g_UI.w_PlayerBlockedCheckbox:SetCheck(Options.IsPlayerBlocked(player))
 
         -- Get permissions
         local playerPermissions = Options.GetPlayerPermissions(player)
@@ -477,9 +495,6 @@ function lf.OnUIPlayerChanged()
             -- Get checkbox reference and permissionValue for this permissionKey
             local CHECKBOX = CHOICE.CHECKBOX
             local permissionValue = playerPermissions[permissionKey]
-
-            -- Enable the checkbox
-            CHECKBOX:Enable()
 
             -- Set the Checkbox to the appropriate state if we have a value for the key
             if permissionValue ~= nil then
@@ -498,13 +513,7 @@ function lf.OnUIPlayerChanged()
     -- We have no player, disable all checkboxes
     else
         Debug.Log("No player selected, disabling all checkboxes")
-        g_UI.w_PlayerBlockedCheckbox:SetCheck(false)
-        g_UI.w_PlayerBlockedCheckbox:Disable()
-
-        for _, CHOICE in pairs(g_UI.w_PlayerCheckboxes) do
-            CHOICE.CHECKBOX:SetCheck(false)
-            CHOICE.CHECKBOX:Disable()
-        end
+        lf.DisablePlayerPermissions()
     end
 end
 

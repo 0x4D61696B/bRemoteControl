@@ -9,6 +9,7 @@ if (Options) then
 end
 
 require "lib/lib_InterfaceOptions"
+require "lib/lib_table"
 
 local lf = {}
 
@@ -99,7 +100,7 @@ Usage: !stuck]]
 --  Variables
 -- =============================================================================
 
-local g_GlobalPermissions = c_DefaultPermissions
+local g_GlobalPermissions = _table.copy(c_DefaultPermissions)
 
 local g_PlayerPermissions = {}
 
@@ -108,7 +109,7 @@ local io_Settings   = {
     Enabled         = false,
     ForwardInvite   = false,
     OpenOnAdd       = false,
-    Permissions     = c_DefaultPermissions
+    Permissions     = _table.copy(c_DefaultPermissions)
 }
 
 local c_OptionsMap = {
@@ -132,13 +133,29 @@ local c_OptionsMap = {
 do
     InterfaceOptions.SaveVersion(1)
 
-    InterfaceOptions.AddCheckBox({id = "ADDON_ENABLED", label = "Addon enabled", default = io_Settings.Enabled})
+    InterfaceOptions.AddCheckBox({
+        id      = "ADDON_ENABLED",
+        label   = "Addon enabled",
+        default = io_Settings.Enabled
+    })
 
-    InterfaceOptions.StartGroup({label = "Miscellanous"})
-        InterfaceOptions.AddCheckBox({id = "DEBUG_MODE",            label = "Debug mode",               default = io_Settings.Debug})
-        InterfaceOptions.AddCheckBox({id = "GROUP_FORWARD_INVITE",  label = "Forward invite requests",  default = io_Settings.ForwardInvite})
-        InterfaceOptions.AddCheckBox({id = "UI_OPEN_ON_ADD",        label = "Open GUI after adding",    default = io_Settings.OpenOnAdd})
-    InterfaceOptions.StopGroup()
+    InterfaceOptions.AddCheckBox({
+        id      = "DEBUG_MODE",
+        label   = "Debug mode",
+        default = io_Settings.Debug
+    })
+
+    InterfaceOptions.AddCheckBox({
+        id      = "GROUP_FORWARD_INVITE",
+        label   = "Forward invite requests",
+        default = io_Settings.ForwardInvite
+    })
+
+    InterfaceOptions.AddCheckBox({
+        id      = "UI_OPEN_ON_ADD",
+        label   = "Open GUI after adding",
+        default = io_Settings.OpenOnAdd
+    })
 
     InterfaceOptions.StartGroup({label = "Default permissions for new whitelist entries", subtab = {"Permissions"}})
         local permissionList = {}
@@ -147,7 +164,9 @@ do
             table.insert(permissionList, permissionName)
         end
 
-        table.sort(permissionList, function(a, b) return a < b end)
+        table.sort(permissionList, function(a, b)
+            return unicode.lower(a) < unicode.lower(b)
+        end)
 
         for i = 1, #permissionList do
             -- Add permission to c_OptionsMap
@@ -174,6 +193,8 @@ end
 -- =============================================================================
 
 function Options.Setup()
+    Debug.Log("Options.Setup()")
+
     -- Set the callback function for the interface options
     InterfaceOptions.SetCallbackFunc(lf.OnOptionChanged)
 
@@ -187,11 +208,9 @@ function Options.Setup()
     end
 end
 
-function Options.IsAddonEnabled()
-    return io_Settings.Enabled
-end
-
 function Options.SaveSettings()
+    Debug.Log("Options.SaveSettings()")
+
     Component.SaveSetting("g_GlobalPermissions", g_GlobalPermissions)
     Component.SaveSetting("g_PlayerPermissions", g_PlayerPermissions)
 end
@@ -219,36 +238,81 @@ function Options.RemoveAllPlayers()
     UI.SelectPlayer()
 end
 
-function Options.HasPermission(playerName, permissionName)
-    Debug.Table("Options.HasPermission()", {playerName = playerName, permissionName = permissionName})
-    return g_GlobalPermissions[permissionName] and (namecompare(playerName, Player.GetInfo()) or (Options.IsPlayerWhitelisted(playerName) and g_PlayerPermissions[ChatLib.StripArmyTag(playerName)][permissionName]))
-end
-
-function Options.IsPlayerWhitelisted(playerName)
-    return type(g_PlayerPermissions[ChatLib.StripArmyTag(playerName)]) == "table"
-end
-
 function Options.GetGlobalPermissions()
+    Debug.Log("Options.GetGlobalPermissions()")
+
     return g_GlobalPermissions
 end
 
 function Options.GetGlobalPermission(permissionName)
-    return g_GlobalPermissions[permissionName]
+    local value = g_GlobalPermissions[permissionName] or false
+    Debug.Log("Options.GetGlobalPermission()", permissionName, value)
+    return value
 end
 
 function Options.SetGlobalPermission(permissionName, value)
     Debug.Table("Options.SetGlobalPermission()", {permissionName = permissionName, value = value})
+
     g_GlobalPermissions[permissionName] = value
     Debug.Table("g_GlobalPermissions", g_GlobalPermissions)
+
     Options.SaveSettings()
 end
 
+function Options.IsPlayerWhitelisted(playerName)
+    local value = type(g_PlayerPermissions[ChatLib.StripArmyTag(playerName)]) == "table"
+    Debug.Log("Options.IsPlayerWhitelisted()", playerName, value)
+    return value
+end
+
+function Options.IsPlayerBlocked(playerName)
+    local value = type(g_PlayerPermissions[ChatLib.StripArmyTag(playerName)]) == "table" and g_PlayerPermissions[ChatLib.StripArmyTag(playerName)].IsBlocked or false
+    Debug.Log("Options.IsPlayerBlocked()", playerName, value)
+    return value
+end
+
+function Options.SetPlayerBlocked(playerName, value)
+    Debug.Table("Options.SetPlayerBlocked()", {playerName = playerName, value = value})
+
+    if (value) then
+        g_PlayerPermissions[playerName].IsBlocked = true
+
+    else
+        g_PlayerPermissions[playerName].IsBlocked = nil
+    end
+
+    Options.SaveSettings()
+end
+
+function Options.HasPermission(playerName, permissionName)
+    local value = g_GlobalPermissions[permissionName] and (namecompare(playerName, Player.GetInfo()) or (Options.IsPlayerWhitelisted(playerName) and g_PlayerPermissions[ChatLib.StripArmyTag(playerName)][permissionName]))
+    Debug.Table("Options.HasPermission()", {playerName = playerName, permissionName = permissionName, value = value})
+    return value
+end
+
 function Options.GetPlayerPermissions(playerName)
-    return (playerName and g_PlayerPermissions[playerName] or g_PlayerPermissions)
+    local values
+
+    if (playerName) then
+        if (type(g_PlayerPermissions[playerName]) == "table") then
+            values = g_PlayerPermissions[playerName]
+
+        else
+            values = _table.copy(c_DefaultPermissions)
+        end
+
+    else
+        values = g_PlayerPermissions
+    end
+
+    Debug.Log("Options.GetPlayerPermissions()", playerName, values)
+    return values
 end
 
 function Options.GetPlayerPermission(playerName, permissionName)
-    return g_PlayerPermissions[playerName][permissionName]
+    local value = g_PlayerPermissions[playerName][permissionName]
+    Debug.Table("Options.GetPlayerPermission()", {playerName = playerName, permissionName = permissionName, value = value})
+    return value
 end
 
 function Options.SetPlayerPermission(playerName, permissionName, value)
@@ -260,19 +324,8 @@ function Options.SetPlayerPermission(playerName, permissionName, value)
     Options.SaveSettings()
 end
 
-function Options.IsPlayerBlocked(playerName)
-    return g_PlayerPermissions[playerName].IsBlocked or false
-end
-
-function Options.SetPlayerBlocked(playerName, value)
-    if (value) then
-        g_PlayerPermissions[playerName].IsBlocked = true
-
-    else
-        g_PlayerPermissions[playerName].IsBlocked = nil
-    end
-
-    Options.SaveSettings()
+function Options.IsAddonEnabled()
+    return io_Settings.Enabled
 end
 
 function Options.IsInviteForwardEnabled()
