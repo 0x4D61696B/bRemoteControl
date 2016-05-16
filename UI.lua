@@ -466,6 +466,9 @@ function lf.OnUIPlayerChanged()
         g_UI.w_PlayerBlockedCheckbox:Enable()
         g_UI.w_PlayerBlockedCheckbox:SetCheck(Options.IsPlayerBlocked(player))
 
+        -- Enable the remove player buttons
+        g_UI.w_ButtonRemovePlayer:Enable()
+
         -- Get permissions
         local playerPermissions = Options.GetPlayerPermissions(player)
 
